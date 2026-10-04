@@ -1,0 +1,110 @@
+@*
+    Rotates the slides slowly. Two stacked image layers crossfade; with prefers-reduced-motion the CSS makes it a cut.
+    A photo that fails to load is skipped. With no slides the widget renders nothing (never an error).
+*@
+@inherits WidgetComponentBase<PhotosSettings, PhotosData>
+@implements IDisposable
+
+@if (Current is { } slide)
+{
+    <figure class="kl-photos kl-photos--@(Settings.CaptionPlacement == CaptionPlacement.Below ? "below" : "overlay")" lang="@Context.Culture.Name">
+        <div class="kl-photos__stage">
+            @foreach (var layer in _layers)
+            {
+                <img @key="layer.Key" class="kl-photos__img @(layer.Slide.Id == slide.Id ? "kl-photos__img--on" : null)"
+                     src="@layer.Slide.ImageUrl" alt="" draggable="false"
+                     @onerror="() => Skip(layer.Slide.Id)" />
+            }
+        </div>
+        @if (Settings.ShowCaptions && Context.Resolve(slide.Caption) is { Length: > 0 } caption)
+        {
+            <figcaption class="kl-photos__caption">@caption</figcaption>
+        }
+    </figure>
+}
+
+@code {
+    private readonly List<(int Key, PhotoSlide Slide)> _layers = [];
+    private readonly HashSet<Guid> _broken = [];
+    private List<PhotoSlide> _order = [];
+    private int _index;
+    private int _layerKey;
+    private Timer? _timer;
+    private int _appliedInterval;
+    private PhotosData? _appliedData;
+
+    private PhotoSlide? Current => _order.Count == 0 ? null : _order[Math.Min(_index, _order.Count - 1)];
+
+    protected override void OnParametersSet()
+    {
+        if (!ReferenceEquals(_appliedData, Data))
+        {
+            _appliedData = Data;
+            RebuildOrder();
+        }
+
+        if (_appliedInterval != Settings.IntervalSeconds)
+        {
+            _appliedInterval = Math.Clamp(Settings.IntervalSeconds, 5, 3600);
+            _timer?.Dispose();
+            _timer = new Timer(_ => InvokeAsync(Advance), null, TimeSpan.FromSeconds(_appliedInterval), TimeSpan.FromSeconds(_appliedInterval));
+        }
+    }
+
+    public void Dispose() => _timer?.Dispose();
+
+    private void RebuildOrder()
+    {
+        var slides = (Data?.Slides ?? []).Where(s => !_broken.Contains(s.Id)).ToList();
+        if (Settings.Shuffle)
+        {
+            // Deterministic per placement, so two displays showing the same album stay in step.
+            var rng = new Random(Placement.Id.GetHashCode());
+            slides = slides.OrderBy(_ => rng.Next()).ToList();
+        }
+
+        var currentId = Current?.Id;
+        _order = slides;
+        _index = currentId is null ? 0 : Math.Max(0, _order.FindIndex(s => s.Id == currentId));
+        ShowCurrent();
+    }
+
+    private void Advance()
+    {
+        if (_order.Count <= 1)
+        {
+            return;
+        }
+
+        _index = (_index + 1) % _order.Count;
+        ShowCurrent();
+        StateHasChanged();
+    }
+
+    private void Skip(Guid id)
+    {
+        _broken.Add(id);
+        RebuildOrder();
+        StateHasChanged();
+    }
+
+    private void ShowCurrent()
+    {
+        if (Current is not { } slide)
+        {
+            _layers.Clear();
+            return;
+        }
+
+        if (_layers.Count > 0 && _layers[^1].Slide.Id == slide.Id)
+        {
+            return;
+        }
+
+        _layers.Add((_layerKey++, slide));
+        while (_layers.Count > 2)
+        {
+            _layers.RemoveAt(0);
+        }
+    }
+}

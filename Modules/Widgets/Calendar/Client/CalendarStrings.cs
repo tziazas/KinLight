@@ -15,6 +15,12 @@ public sealed class CalendarStrings
     /// <summary>"All day" label for events without a time.</summary>
     public const string AllDay = nameof(AllDay);
 
+    /// <summary>Settings label: events to show.</summary>
+    public const string Settings_MaxEvents = nameof(Settings_MaxEvents);
+
+    /// <summary>Settings label: show all-day events.</summary>
+    public const string Settings_ShowAllDayEvents = nameof(Settings_ShowAllDayEvents);
+
     private CalendarStrings()
     {
     }

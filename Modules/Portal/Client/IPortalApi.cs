@@ -17,6 +17,9 @@ public interface IPortalApi
     /// <summary>Saves the whole layout. Returns the new version. Throws <see cref="VersionConflictException"/> on a stale version.</summary>
     Task<long> SaveLayoutAsync(SaveDisplayLayoutRequest request, CancellationToken cancellationToken);
 
+    /// <summary>Languages used by the household's displays (display and backup languages), for caption editors.</summary>
+    Task<IReadOnlyList<string>> GetDisplayLanguagesAsync(CancellationToken cancellationToken);
+
     /// <summary>Updates the display's settings. Returns the new version. Throws <see cref="VersionConflictException"/> on a stale version.</summary>
     Task<long> UpdateSettingsAsync(UpdateDisplaySettingsRequest request, CancellationToken cancellationToken);
 }

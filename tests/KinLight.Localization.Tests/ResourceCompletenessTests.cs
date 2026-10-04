@@ -4,15 +4,20 @@ namespace KinLight.Localization.Tests;
 
 public class ResourceCompletenessTests
 {
-    private static readonly string[] DisplayFolders = ["Modules/Widgets", "Modules/Display"];
-    private static readonly string[] PortalFolders = ["Modules/Portal"];
+    private static readonly string[] AllFolders = ["Modules/Widgets", "Modules/Display", "Modules/Portal"];
+
+    // A resource set belongs to the portal side when it lives in a Portal project (Modules/Portal/** or Modules/Widgets/*/Portal/**).
+    private static bool IsPortalSide(ResourceSet set) => set.Name.Split('/').Contains("Portal");
+
+    private static IReadOnlyList<ResourceSet> DisplaySets => ResourceSet.Discover(AllFolders).Where(s => !IsPortalSide(s)).ToList();
+    private static IReadOnlyList<ResourceSet> PortalSets => ResourceSet.Discover(AllFolders).Where(IsPortalSide).ToList();
 
     [Fact]
     public void Every_translation_has_exactly_the_keys_of_its_English_source()
     {
         var problems = new List<string>();
 
-        foreach (var set in ResourceSet.Discover([.. DisplayFolders, .. PortalFolders]))
+        foreach (var set in ResourceSet.Discover(AllFolders))
         {
             Assert.True(set.ValuesByCulture.ContainsKey(ResourceSet.NeutralCulture), $"{set.Name} has no neutral (English) .resx");
             var english = set.ValuesByCulture[ResourceSet.NeutralCulture].Keys.ToHashSet(StringComparer.Ordinal);
@@ -44,7 +49,7 @@ public class ResourceCompletenessTests
     [Fact]
     public void No_resource_value_is_empty()
     {
-        var empty = ResourceSet.Discover([.. DisplayFolders, .. PortalFolders])
+        var empty = ResourceSet.Discover(AllFolders)
             .SelectMany(set => set.ValuesByCulture.SelectMany(c => c.Value.Where(v => string.IsNullOrWhiteSpace(v.Value)).Select(v => $"{set.Name}.{c.Key}: {v.Key}")))
             .ToList();
 
@@ -55,18 +60,17 @@ public class ResourceCompletenessTests
     public void Display_languages_offered_to_families_are_exactly_the_fully_translated_ones()
     {
         // A language can be chosen for a display only when every widget and display resource set has it (ARCHITECTURE.md §15).
-        AssertOfferedEqualsComplete(KnownCultures.Display, DisplayFolders, nameof(KnownCultures.Display));
+        AssertOfferedEqualsComplete(KnownCultures.Display, DisplaySets, nameof(KnownCultures.Display));
     }
 
     [Fact]
     public void Portal_languages_offered_are_exactly_the_fully_translated_ones()
     {
-        AssertOfferedEqualsComplete(KnownCultures.Portal, PortalFolders, nameof(KnownCultures.Portal));
+        AssertOfferedEqualsComplete(KnownCultures.Portal, PortalSets, nameof(KnownCultures.Portal));
     }
 
-    private static void AssertOfferedEqualsComplete(IReadOnlyList<string> offered, string[] folders, string listName)
+    private static void AssertOfferedEqualsComplete(IReadOnlyList<string> offered, IReadOnlyList<ResourceSet> sets, string listName)
     {
-        var sets = ResourceSet.Discover(folders);
         Assert.NotEmpty(sets);
 
         var complete = sets
@@ -82,7 +86,7 @@ public class ResourceCompletenessTests
 
         Assert.True(notTranslated.Count == 0,
             $"{listName} offers languages that are not fully translated: {string.Join(", ", notTranslated)}. " +
-            "Translate every .resx under " + string.Join(", ", folders) + " or remove them from the list.");
+            "Translate every .resx for that side (" + string.Join(", ", sets.Select(s => s.Name)) + ") or remove them from the list.");
         Assert.True(notOffered.Count == 0,
             $"Fully translated languages missing from {listName}: {string.Join(", ", notOffered)}. Add them to the list.");
     }

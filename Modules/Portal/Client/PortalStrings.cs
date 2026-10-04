@@ -136,6 +136,18 @@ public sealed class PortalStrings
     /// <summary>You have unsaved changes. Navigate again to leave without saving.</summary>
     public const string Arrange_LeaveWarning = nameof(Arrange_LeaveWarning);
 
+    /// <summary>Widget settings</summary>
+    public const string Arrange_WidgetSettings = nameof(Arrange_WidgetSettings);
+
+    /// <summary>OK</summary>
+    public const string Dialog_Ok = nameof(Dialog_Ok);
+
+    /// <summary>This widget has no settings.</summary>
+    public const string Widget_NoSettings = nameof(Widget_NoSettings);
+
+    /// <summary>Type a city in English, for example Athens or London.</summary>
+    public const string Settings_TimeZoneHelp = nameof(Settings_TimeZoneHelp);
+
     private PortalStrings()
     {
     }

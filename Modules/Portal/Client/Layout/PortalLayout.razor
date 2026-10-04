@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IStringLocalizer<PortalStrings> L
+@inject IEnumerable<IPortalNavItem> NavItems
 
 <MudThemeProvider Theme="KinLightTheme.Default" />
 <MudPopoverProvider />
@@ -17,6 +18,10 @@
         <MudNavMenu>
             <MudNavLink Href="portal/today" Icon="@Icons.Material.Filled.Today" Disabled="true">@L[PortalStrings.Nav_Today]</MudNavLink>
             <MudNavLink Href="portal/displays" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tv">@L[PortalStrings.Nav_Displays]</MudNavLink>
+            @foreach (var item in NavItems.OrderBy(i => i.Order))
+            {
+                <MudNavLink Href="@item.Href" Match="NavLinkMatch.Prefix" Icon="@item.Icon">@item.Label</MudNavLink>
+            }
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent>

@@ -1,0 +1,125 @@
+@*
+    Generated settings form (ARCHITECTURE.md §13): one field per public read/write property of the widget's settings
+    class. Labels come from [Display(Name)] treated as a key in the widget's strings (portal language), falling back
+    to the literal. [Range] bounds numeric fields. Enums become selects. LocalizedText gets the multi-language editor.
+    A custom editor registered for a property replaces the default field.
+*@
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+@using System.Reflection
+@inject IWidgetSettingsEditorRegistry Editors
+@inject IStringLocalizer<PortalStrings> L
+
+@if (_fields.Count == 0)
+{
+    <MudText Typo="Typo.body2">@L[PortalStrings.Widget_NoSettings]</MudText>
+}
+else
+{
+    <MudStack Spacing="3">
+        @foreach (var field in _fields)
+        {
+            var property = field.Property;
+            var label = field.Label;
+            var value = property.GetValue(Settings);
+
+            @if (field.Editor is not null)
+            {
+                <DynamicComponent Type="field.Editor" Parameters="EditorParameters(property, label, value)" />
+            }
+            else if (property.PropertyType == typeof(bool))
+            {
+                <MudSwitch T="bool" Value="(bool)value!" ValueChanged="v => Set(property, v)" Label="@label" Color="Color.Primary" />
+            }
+            else if (property.PropertyType == typeof(int))
+            {
+                var range = property.GetCustomAttribute<RangeAttribute>();
+                <MudNumericField T="int" Value="(int)value!" ValueChanged="v => Set(property, v)" Label="@label"
+                                 Min="@(range is null ? int.MinValue : Convert.ToInt32(range.Minimum, CultureInfo.InvariantCulture))"
+                                 Max="@(range is null ? int.MaxValue : Convert.ToInt32(range.Maximum, CultureInfo.InvariantCulture))" />
+            }
+            else if (property.PropertyType == typeof(double))
+            {
+                var range = property.GetCustomAttribute<RangeAttribute>();
+                <MudNumericField T="double" Value="(double)value!" ValueChanged="v => Set(property, v)" Label="@label" Step="0.1"
+                                 Min="@(range is null ? double.MinValue : Convert.ToDouble(range.Minimum, CultureInfo.InvariantCulture))"
+                                 Max="@(range is null ? double.MaxValue : Convert.ToDouble(range.Maximum, CultureInfo.InvariantCulture))" />
+            }
+            else if (property.PropertyType.IsEnum)
+            {
+                <MudSelect T="string" Value="@(value?.ToString())" ValueChanged="v => Set(property, Enum.Parse(property.PropertyType, v!))" Label="@label">
+                    @foreach (var member in Enum.GetNames(property.PropertyType))
+                    {
+                        <MudSelectItem T="string" Value="@member">@EnumLabel(property.PropertyType, member)</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else if (property.PropertyType == typeof(LocalizedText))
+            {
+                <LocalizedTextEditor Value="(LocalizedText?)value ?? new LocalizedText()" ValueChanged="v => Set(property, v)" Label="@label" Languages="Languages" />
+            }
+            else if (property.PropertyType == typeof(string))
+            {
+                <MudTextField T="string" Value="(string?)value" ValueChanged="v => Set(property, v)" Label="@label" />
+            }
+        }
+    </MudStack>
+}
+
+@code {
+    private readonly List<(PropertyInfo Property, string Label, Type? Editor)> _fields = [];
+    private IWidgetStrings? _strings;
+
+    /// <summary>The settings instance being edited in place.</summary>
+    [Parameter, EditorRequired]
+    public required object Settings { get; set; }
+
+    /// <summary>The widget, for labels.</summary>
+    [Parameter, EditorRequired]
+    public required IWidgetDefinition Definition { get; set; }
+
+    /// <summary>Languages offered by LocalizedText fields.</summary>
+    [Parameter]
+    public IReadOnlyList<string> Languages { get; set; } = ["en"];
+
+    /// <summary>Raised after any value changes.</summary>
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _strings = WidgetStrings.For(Definition.StringsType, CultureInfo.CurrentUICulture);
+        _fields.Clear();
+        foreach (var property in Settings.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0))
+        {
+            _fields.Add((property, LabelFor(property), Editors.Find(Settings.GetType(), property.Name)));
+        }
+    }
+
+    private Dictionary<string, object?> EditorParameters(PropertyInfo property, string label, object? value) => new()
+    {
+        ["Value"] = value,
+        ["ValueChanged"] = EventCallback.Factory.Create<object?>(this, v => Set(property, v)),
+        ["Label"] = label,
+    };
+
+    private async Task Set(PropertyInfo property, object? value)
+    {
+        property.SetValue(Settings, value);
+        await Changed.InvokeAsync();
+    }
+
+    private string LabelFor(PropertyInfo property)
+    {
+        var name = property.GetCustomAttribute<DisplayAttribute>()?.Name;
+        return name is null ? property.Name : Resolve(name);
+    }
+
+    private string EnumLabel(Type enumType, string member)
+    {
+        var name = enumType.GetField(member)?.GetCustomAttribute<DisplayAttribute>()?.Name;
+        return name is null ? member : Resolve(name);
+    }
+
+    private string Resolve(string keyOrText) => _strings?[keyOrText] ?? keyOrText;
+}

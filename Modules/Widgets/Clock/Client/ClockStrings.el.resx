@@ -9,4 +9,6 @@
   <data name="ItIsAfternoon" xml:space="preserve"><value>Είναι {0} απόγευμα.</value></data>
   <data name="ItIsEvening" xml:space="preserve"><value>Είναι {0} βράδυ.</value></data>
   <data name="ItIsNight" xml:space="preserve"><value>Είναι νύχτα.</value></data>
+  <data name="Settings_ShowTime" xml:space="preserve"><value>Εμφάνιση ώρας</value></data>
+  <data name="Settings_ShowDate" xml:space="preserve"><value>Εμφάνιση ημερομηνίας</value></data>
 </root>

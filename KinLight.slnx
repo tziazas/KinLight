@@ -28,6 +28,11 @@
     <Project Path="Modules/Widgets/Calendar/Api/KinLight.Modules.Widgets.Calendar.Api.csproj" />
     <Project Path="Modules/Widgets/Calendar/Client/KinLight.Modules.Widgets.Calendar.Client.csproj" />
   </Folder>
+  <Folder Name="/Modules/Widgets/Photos/">
+    <Project Path="Modules/Widgets/Photos/Api/KinLight.Modules.Widgets.Photos.Api.csproj" />
+    <Project Path="Modules/Widgets/Photos/Client/KinLight.Modules.Widgets.Photos.Client.csproj" />
+    <Project Path="Modules/Widgets/Photos/Portal/KinLight.Modules.Widgets.Photos.Portal.csproj" />
+  </Folder>
   <Folder Name="/Modules/Widgets/Clock/">
     <Project Path="Modules/Widgets/Clock/Client/KinLight.Modules.Widgets.Clock.Client.csproj" />
   </Folder>

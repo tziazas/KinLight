@@ -8,4 +8,6 @@
   <data name="Today" xml:space="preserve"><value>Hoy</value></data>
   <data name="NothingMoreToday" xml:space="preserve"><value>No hay nada más previsto para hoy.</value></data>
   <data name="AllDay" xml:space="preserve"><value>Todo el día</value></data>
+  <data name="Settings_MaxEvents" xml:space="preserve"><value>Eventos a mostrar</value></data>
+  <data name="Settings_ShowAllDayEvents" xml:space="preserve"><value>Mostrar eventos de todo el día</value></data>
 </root>

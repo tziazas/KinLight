@@ -5,6 +5,7 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IStringLocalizer<PortalStrings> L
+@inject IDialogService Dialogs
 
 <PageTitle>@L[PortalStrings.Arrange_Title]</PageTitle>
 
@@ -49,6 +50,7 @@ else
                         <MudSlider T="double" Value="selected.FontScale" ValueChanged="v => SetFontScale(selected, v)" Min="0.75" Max="2.0" Step="0.05" Color="Color.Primary" />
                         <MudSwitch T="bool" Value="selected.HighContrast" ValueChanged="v => SetHighContrast(selected, v)" Label="@L[PortalStrings.Arrange_HighContrast]" Color="Color.Primary" />
                         <MudSwitch T="bool" Value="selected.IsEnabled" ValueChanged="v => SetEnabled(selected, v)" Label="@L[PortalStrings.Arrange_Shown]" Color="Color.Primary" />
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Tune" OnClick="() => EditSettingsAsync(selected)">@L[PortalStrings.Arrange_WidgetSettings]</MudButton>
                         <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => RemoveAsync(selected)">@L[PortalStrings.Arrange_Remove]</MudButton>
                     </MudStack>
                 </MudPaper>
@@ -132,6 +134,32 @@ else
         _items.Add(item);
         _selectedId = item.Id;
         MarkDirty();
+    }
+
+    private async Task EditSettingsAsync(EditablePlacement item)
+    {
+        var definition = Catalog.Find(item.TypeKey);
+        if (definition is null)
+        {
+            return;
+        }
+
+        var copy = WidgetSettingsJson.Read(item.SettingsJson, definition.SettingsType);
+        var languages = await Api.GetDisplayLanguagesAsync(CancellationToken.None);
+        var parameters = new DialogParameters<WidgetSettingsDialog>
+        {
+            { d => d.Title, NameOf(item.TypeKey) },
+            { d => d.Settings, copy },
+            { d => d.Definition, definition },
+            { d => d.Languages, languages },
+        };
+        var dialog = await Dialogs.ShowAsync<WidgetSettingsDialog>(null, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true });
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: { } updated })
+        {
+            item.SettingsJson = WidgetSettingsJson.Write(updated);
+            MarkDirty();
+        }
     }
 
     private async Task RemoveAsync(EditablePlacement item)

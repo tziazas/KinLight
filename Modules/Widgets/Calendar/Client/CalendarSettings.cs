@@ -9,11 +9,11 @@ namespace KinLight.Modules.Widgets.Calendar.Client;
 public sealed class CalendarSettings
 {
     /// <summary>How many upcoming events to show at most.</summary>
-    [Display(Name = "Events to show")]
+    [Display(Name = nameof(CalendarStrings.Settings_MaxEvents))]
     [Range(1, 10)]
     public int MaxEvents { get; set; } = 4;
 
     /// <summary>Whether to show all-day events.</summary>
-    [Display(Name = "Show all-day events")]
+    [Display(Name = nameof(CalendarStrings.Settings_ShowAllDayEvents))]
     public bool ShowAllDayEvents { get; set; } = true;
 }

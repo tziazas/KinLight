@@ -1,3 +1,4 @@
+using KinLight.Modules.Portal.Client.Settings;
 using KinLight.Modules.Widgets.BuiltIn;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,6 +23,7 @@ public static class PortalClientServiceCollectionExtensions
         services.AddLocalization();
         services.AddKinLightBuiltInWidgets();
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<IWidgetSettingsEditorRegistry, WidgetSettingsEditorRegistry>();
 
         // MudBlazor's own strings (pickers, tables) in the portal's language.
         services.AddMudTranslations();

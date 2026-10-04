@@ -1,0 +1,67 @@
+.kl-photos {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    margin: 0;
+    font-size: calc(var(--kl-base-font, 1rem) * var(--font-scale, 1));
+    line-height: 1.25;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.kl-photos__stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-block-size: 0;
+    background: #000;
+}
+
+.kl-photos__img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 1.8s ease-in-out;
+}
+
+.kl-photos__img--on {
+    opacity: 1;
+}
+
+.kl-photos__caption {
+    font-size: 1.6em;
+    font-weight: 600;
+    padding: 0.35em 0.6em;
+}
+
+/* Over the photo: a dark band along the bottom so the text stays readable on any picture. */
+.kl-photos--overlay .kl-photos__stage {
+    flex: 1 1 100%;
+}
+
+.kl-photos--overlay .kl-photos__caption {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    padding-block-start: 1em;
+}
+
+.kl-photos--overlay {
+    position: relative;
+}
+
+/* Under the photo: the caption takes its own row. */
+.kl-photos--below .kl-photos__caption {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kl-photos__img {
+        transition: none;
+    }
+}

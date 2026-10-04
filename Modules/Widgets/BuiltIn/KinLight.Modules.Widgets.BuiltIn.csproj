@@ -19,6 +19,7 @@
     <ProjectReference Include="../Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
     <ProjectReference Include="../Clock/Client/KinLight.Modules.Widgets.Clock.Client.csproj" />
     <ProjectReference Include="../Calendar/Client/KinLight.Modules.Widgets.Calendar.Client.csproj" />
+    <ProjectReference Include="../Photos/Client/KinLight.Modules.Widgets.Photos.Client.csproj" />
   </ItemGroup>
 
 </Project>

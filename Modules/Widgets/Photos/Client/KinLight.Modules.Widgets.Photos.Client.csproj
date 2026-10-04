@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Photos widget, browser side (ARCHITECTURE.md §14): rotates family photos with captions that say who the person
+    is to the viewer ("Erato, your daughter"). Captions are LocalizedText entered per language in the portal.
+    Browser-safe; references only Abstractions and Shared. Library management lives in Photos.Portal.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight photos widget (display view, settings, strings, library contracts).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

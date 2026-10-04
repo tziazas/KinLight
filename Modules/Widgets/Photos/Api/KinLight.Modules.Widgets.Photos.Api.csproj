@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Photos widget, server side (ARCHITECTURE.md §14, §17): produces each placement's slides from the household
+    library and serves image bytes only through an authorized endpoint, never as public static files.
+    Storage itself is behind IPhotoLibraryStore (local disk in the public repository, Azure Blob in the private one).
+    Server only. References its own Client and Abstractions; never another widget, Display or Portal.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight photos widget data provider and image endpoint.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Client/KinLight.Modules.Widgets.Photos.Client.csproj" />
+  </ItemGroup>
+
+</Project>

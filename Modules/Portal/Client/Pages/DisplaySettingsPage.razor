@@ -42,7 +42,8 @@ else
                     }
                 </MudSelect>
 
-                <MudAutocomplete T="string" @bind-Value="_timeZoneId" Label="@L[PortalStrings.Settings_TimeZone]" SearchFunc="SearchTimeZones" Required="true" RequiredError="@L[PortalStrings.Settings_TimeZoneRequired]" MaxItems="20" />
+                <MudAutocomplete T="string" @bind-Value="_timeZoneId" Label="@L[PortalStrings.Settings_TimeZone]" HelperText="@L[PortalStrings.Settings_TimeZoneHelp]"
+                                 SearchFunc="SearchTimeZones" ToStringFunc="TimeZoneLabel" MaxItems="null" Required="true" RequiredError="@L[PortalStrings.Settings_TimeZoneRequired]" />
 
                 <MudText Typo="Typo.subtitle1" Class="mt-2">@L[PortalStrings.Settings_NightHours]</MudText>
                 <MudText Typo="Typo.body2">@L[PortalStrings.Settings_NightHoursHelp]</MudText>
@@ -61,7 +62,12 @@ else
 }
 
 @code {
-    private static readonly IReadOnlyList<string> TimeZoneIds = TimeZoneInfo.GetSystemTimeZones().Select(tz => tz.Id).Order(StringComparer.Ordinal).ToList();
+    // Every IANA zone the runtime knows, ordered by current offset then name, so neighbouring zones sit together.
+    private static readonly IReadOnlyList<TimeZoneInfo> TimeZones = TimeZoneInfo.GetSystemTimeZones()
+        .Where(tz => tz.Id.Contains('/', StringComparison.Ordinal) && !tz.Id.StartsWith("Etc/", StringComparison.Ordinal))
+        .OrderBy(tz => tz.GetUtcOffset(DateTimeOffset.UtcNow))
+        .ThenBy(tz => tz.Id, StringComparer.Ordinal)
+        .ToList();
 
     private List<BreadcrumbItem> Crumbs => [new(L[PortalStrings.Nav_Displays], "portal/displays"), new(L[PortalStrings.Settings_Title], null, disabled: true)];
 
@@ -99,12 +105,51 @@ else
         _nightEnd = _config.NightMode.EndsAt.ToTimeSpan();
     }
 
-    private Task<IEnumerable<string>> SearchTimeZones(string? value, CancellationToken cancellationToken)
+    private static Task<IEnumerable<string>> SearchTimeZones(string? value, CancellationToken cancellationToken)
     {
-        IEnumerable<string> result = string.IsNullOrWhiteSpace(value)
-            ? TimeZoneIds
-            : TimeZoneIds.Where(id => id.Contains(value, StringComparison.OrdinalIgnoreCase));
+        // Opening the field with a value selected searches for its own label: show the whole list in that case.
+        var query = value?.Trim() ?? string.Empty;
+        var suffix = query.IndexOf(" (UTC", StringComparison.Ordinal);
+        if (suffix >= 0)
+        {
+            query = query[..suffix];
+        }
+
+        if (query.Length == 0 || TimeZones.Any(tz => tz.Id.Replace('_', ' ').Equals(query, StringComparison.OrdinalIgnoreCase)))
+        {
+            return Task.FromResult(TimeZones.Select(tz => tz.Id));
+        }
+
+        query = query.Replace(' ', '_');
+
+        // City matches first ("Athens" before "America/Atka"), then anything containing the text.
+        var result = TimeZones
+            .Select(tz => (tz.Id, City: tz.Id[(tz.Id.LastIndexOf('/') + 1)..]))
+            .Where(x => x.Id.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.City.StartsWith(query, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.Id);
         return Task.FromResult(result);
+    }
+
+    private static string TimeZoneLabel(string? id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var tz = TimeZoneInfo.FindSystemTimeZoneById(id);
+            var offset = tz.GetUtcOffset(DateTimeOffset.UtcNow);
+            var sign = offset < TimeSpan.Zero ? "-" : "+";
+            var hoursMinutes = offset.ToString(@"hh\:mm", System.Globalization.CultureInfo.InvariantCulture);
+            return $"{id.Replace('_', ' ')} (UTC{sign}{hoursMinutes})";
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return id;
+        }
     }
 
     private async Task SaveAsync()

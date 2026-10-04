@@ -8,4 +8,6 @@
   <data name="Today" xml:space="preserve"><value>Σήμερα</value></data>
   <data name="NothingMoreToday" xml:space="preserve"><value>Δεν υπάρχει κάτι άλλο προγραμματισμένο για σήμερα.</value></data>
   <data name="AllDay" xml:space="preserve"><value>Όλη μέρα</value></data>
+  <data name="Settings_MaxEvents" xml:space="preserve"><value>Γεγονότα προς εμφάνιση</value></data>
+  <data name="Settings_ShowAllDayEvents" xml:space="preserve"><value>Εμφάνιση ολοήμερων γεγονότων</value></data>
 </root>

@@ -1,5 +1,6 @@
 using KinLight.Modules.Widgets.Calendar.Client;
 using KinLight.Modules.Widgets.Clock.Client;
+using KinLight.Modules.Widgets.Photos.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KinLight.Modules.Widgets.BuiltIn;
@@ -14,6 +15,7 @@ public static class BuiltInWidgetServiceCollectionExtensions
 
         return services
             .AddKinLightClockWidget()
-            .AddKinLightCalendarWidget();
+            .AddKinLightCalendarWidget()
+            .AddKinLightPhotosWidget();
     }
 }

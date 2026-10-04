@@ -4,6 +4,7 @@ using KinLight.Modules.Portal.Client;
 using KinLight.Modules.Shared;
 using KinLight.Modules.Widgets.Abstractions;
 using KinLight.Modules.Widgets.Clock.Client;
+using KinLight.Modules.Widgets.Photos.Client;
 using Microsoft.JSInterop;
 
 namespace KinLight.Client.Fakes;
@@ -22,15 +23,19 @@ public sealed class LocalStorageKinLightStore : IDisplayApi, IPortalApi
     private readonly IJSRuntime _js;
     private readonly IWidgetCatalog _catalog;
     private readonly TimeProvider _clock;
+    private readonly IndexedDbPhotoLibrary _photos;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private List<DisplayConfig>? _displays;
 
     /// <summary>Creates the store.</summary>
-    public LocalStorageKinLightStore(IJSRuntime js, IWidgetCatalog catalog, TimeProvider clock)
+    public LocalStorageKinLightStore(IJSRuntime js, IWidgetCatalog catalog, TimeProvider clock, IndexedDbPhotoLibrary photos)
     {
         _js = js;
         _catalog = catalog;
         _clock = clock;
+        _photos = photos;
+        // A library change is a config change as far as the display is concerned: it refetches widget data.
+        _photos.Changed += NotifyChangedAsync;
     }
 
     /// <inheritdoc />
@@ -60,6 +65,24 @@ public sealed class LocalStorageKinLightStore : IDisplayApi, IPortalApi
             return null;
         }
 
+        if (placement.TypeKey == PhotosWidgetDefinition.Key)
+        {
+            // Real library content, not sample data, so what the family uploads is what the screen shows.
+            var settings = (PhotosSettings)WidgetSettingsJson.Read(placement.SettingsJson, typeof(PhotosSettings));
+            var photos = await _photos.ListForDisplayAsync(settings.Album, cancellationToken);
+            var slides = new List<PhotoSlide>(photos.Count);
+            foreach (var photo in photos)
+            {
+                var url = await _photos.GetImageUrlAsync(photo.Id, cancellationToken);
+                if (url is not null)
+                {
+                    slides.Add(new PhotoSlide(photo.Id, url, photo.Caption.IsEmpty ? null : photo.Caption));
+                }
+            }
+
+            return new PhotosData(slides);
+        }
+
         var context = new DisplayContext(
             SafeCulture(display.Culture),
             display.FallbackCulture is null ? null : SafeCulture(display.FallbackCulture),
@@ -83,6 +106,18 @@ public sealed class LocalStorageKinLightStore : IDisplayApi, IPortalApi
     {
         var displays = await LoadAsync(cancellationToken);
         return displays.FirstOrDefault(d => d.DisplayId == displayId);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<string>> GetDisplayLanguagesAsync(CancellationToken cancellationToken)
+    {
+        var displays = await LoadAsync(cancellationToken);
+        return displays
+            .SelectMany(d => new[] { d.Culture, d.FallbackCulture })
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Select(c => c!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     /// <inheritdoc />

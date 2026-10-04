@@ -9,4 +9,6 @@
   <data name="ItIsAfternoon" xml:space="preserve"><value>Es {0} por la tarde.</value></data>
   <data name="ItIsEvening" xml:space="preserve"><value>Es {0} por la noche.</value></data>
   <data name="ItIsNight" xml:space="preserve"><value>Es de noche.</value></data>
+  <data name="Settings_ShowTime" xml:space="preserve"><value>Mostrar la hora</value></data>
+  <data name="Settings_ShowDate" xml:space="preserve"><value>Mostrar la fecha</value></data>
 </root>

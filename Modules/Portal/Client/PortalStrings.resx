@@ -47,4 +47,8 @@
   <data name="Arrange_Remove" xml:space="preserve"><value>Remove from screen</value></data>
   <data name="Arrange_AddWidget" xml:space="preserve"><value>Add a widget</value></data>
   <data name="Arrange_LeaveWarning" xml:space="preserve"><value>You have unsaved changes. Navigate again to leave without saving.</value></data>
+  <data name="Arrange_WidgetSettings" xml:space="preserve"><value>Widget settings</value></data>
+  <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Widget_NoSettings" xml:space="preserve"><value>This widget has no settings.</value></data>
+  <data name="Settings_TimeZoneHelp" xml:space="preserve"><value>Type a city in English, for example Athens or London.</value></data>
 </root>

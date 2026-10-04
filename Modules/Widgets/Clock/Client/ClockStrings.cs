@@ -22,6 +22,12 @@ public sealed class ClockStrings
     /// <summary>"It is night-time." The night sentence omits the weekday on purpose.</summary>
     public const string ItIsNight = nameof(ItIsNight);
 
+    /// <summary>Settings label: show the time.</summary>
+    public const string Settings_ShowTime = nameof(Settings_ShowTime);
+
+    /// <summary>Settings label: show the date.</summary>
+    public const string Settings_ShowDate = nameof(Settings_ShowDate);
+
     private ClockStrings()
     {
     }

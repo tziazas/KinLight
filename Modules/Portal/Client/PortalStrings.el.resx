@@ -47,4 +47,8 @@
   <data name="Arrange_Remove" xml:space="preserve"><value>Αφαίρεση από την οθόνη</value></data>
   <data name="Arrange_AddWidget" xml:space="preserve"><value>Προσθήκη στοιχείου</value></data>
   <data name="Arrange_LeaveWarning" xml:space="preserve"><value>Έχετε μη αποθηκευμένες αλλαγές. Πλοηγηθείτε ξανά για να φύγετε χωρίς αποθήκευση.</value></data>
+  <data name="Arrange_WidgetSettings" xml:space="preserve"><value>Ρυθμίσεις στοιχείου</value></data>
+  <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Widget_NoSettings" xml:space="preserve"><value>Αυτό το στοιχείο δεν έχει ρυθμίσεις.</value></data>
+  <data name="Settings_TimeZoneHelp" xml:space="preserve"><value>Γράψτε μια πόλη στα αγγλικά, π.χ. Athens ή London.</value></data>
 </root>
