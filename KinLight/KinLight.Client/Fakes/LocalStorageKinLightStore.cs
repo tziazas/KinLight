@@ -12,7 +12,7 @@ namespace KinLight.Client.Fakes;
 /// <summary>
 /// Development stand-in for the server: displays live in localStorage, widget data is each widget's sample data.
 /// Implements both the display's and the portal's API so a save in the portal shows on the display.
-/// Honours the Version token so concurrency behaviour exists from day one. Made-up data only.
+/// Honors the Version token so concurrency behavior exists from day one. Made-up data only.
 /// </summary>
 public sealed class LocalStorageKinLightStore : IDisplayApi, IPortalApi
 {

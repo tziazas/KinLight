@@ -1,5 +1,5 @@
 // Downscales a picked image in the browser before upload: displays never need more than ~1920px, and a
-// Raspberry Pi should not decode 12-megapixel originals. Honours EXIF orientation. Returns a JPEG data URL.
+// Raspberry Pi should not decode 12-megapixel originals. Honors EXIF orientation. Returns a JPEG data URL.
 export async function downscale(file, maxEdge, quality) {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));

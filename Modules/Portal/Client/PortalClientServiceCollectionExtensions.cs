@@ -30,7 +30,7 @@ public static class PortalClientServiceCollectionExtensions
 
         services.AddMudServices(options =>
         {
-            // Calm and plain: short-lived, bottom-centre snackbars that never pile up.
+            // Calm and plain: short-lived, bottom-center snackbars that never pile up.
             options.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomCenter;
             options.SnackbarConfiguration.PreventDuplicates = true;
             options.SnackbarConfiguration.MaxDisplayedSnackbars = 2;

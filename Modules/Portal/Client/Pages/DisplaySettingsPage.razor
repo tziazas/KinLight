@@ -62,7 +62,7 @@ else
 }
 
 @code {
-    // Every IANA zone the runtime knows, ordered by current offset then name, so neighbouring zones sit together.
+    // Every IANA zone the runtime knows, ordered by current offset then name, so neighboring zones sit together.
     private static readonly IReadOnlyList<TimeZoneInfo> TimeZones = TimeZoneInfo.GetSystemTimeZones()
         .Where(tz => tz.Id.Contains('/', StringComparison.Ordinal) && !tz.Id.StartsWith("Etc/", StringComparison.Ordinal))
         .OrderBy(tz => tz.GetUtcOffset(DateTimeOffset.UtcNow))
