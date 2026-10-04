@@ -1,0 +1,70 @@
+@*
+    Edits caregiver-entered text in every language the household's displays use (ARCHITECTURE.md §15).
+    Typing marks that language as written by a person; an unreviewed machine translation shows a marker until edited.
+*@
+@using System.Globalization
+
+<MudStack Spacing="1">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <MudText Typo="Typo.subtitle2">@Label</MudText>
+    }
+    @foreach (var culture in Languages)
+    {
+        var name = culture;
+        <MudTextField T="string"
+                      Value="@(Value.Values.TryGetValue(name, out var text) ? text : string.Empty)"
+                      ValueChanged="v => SetAsync(name, v)"
+                      Label="@LanguageLabel(name)"
+                      Adornment="@(Value.Unreviewed.Contains(name) ? Adornment.End : Adornment.None)"
+                      AdornmentIcon="@Icons.Material.Filled.Translate"
+                      AdornmentColor="Color.Warning"
+                      Immediate="false" />
+    }
+</MudStack>
+
+@code {
+    /// <summary>The text being edited in place.</summary>
+    [Parameter, EditorRequired]
+    public required LocalizedText Value { get; set; }
+
+    /// <summary>Raised after a change, with the same instance.</summary>
+    [Parameter]
+    public EventCallback<LocalizedText> ValueChanged { get; set; }
+
+    /// <summary>Languages to offer.</summary>
+    [Parameter]
+    public IReadOnlyList<string> Languages { get; set; } = ["en"];
+
+    /// <summary>Field group label.</summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    private async Task SetAsync(string culture, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            Value.Values.Remove(culture);
+            Value.Unreviewed.Remove(culture);
+        }
+        else
+        {
+            Value.SetReviewed(culture, text.Trim());
+        }
+
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private static string LanguageLabel(string culture)
+    {
+        try
+        {
+            var info = CultureInfo.GetCultureInfo(culture);
+            return info.TextInfo.ToTitleCase(info.NativeName);
+        }
+        catch (CultureNotFoundException)
+        {
+            return culture;
+        }
+    }
+}

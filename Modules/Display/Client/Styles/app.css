@@ -1,0 +1,33 @@
+/*
+  Tailwind CSS source for the KinLight display.
+  Compiled by MSBuild to wwwroot/css/app.css (see the csproj). Do not edit the generated file.
+
+  Design rules (ARCHITECTURE.md §3): plain, calm, legible. Minimal motion; respect prefers-reduced-motion.
+*/
+
+@import "tailwindcss";
+
+/* Scan this project's Razor components for class names. */
+@source "../";
+
+@import "./fonts.css";
+
+@theme {
+  --font-sans: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, "Noto Sans", sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

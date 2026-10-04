@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve"><value>KinLight</value></data>
+  <data name="Nav_Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Nav_Displays" xml:space="preserve"><value>Displays</value></data>
+  <data name="Displays_Title" xml:space="preserve"><value>Displays</value></data>
+  <data name="Displays_Empty" xml:space="preserve"><value>No displays yet. Pair a screen from the Devices page to get started.</value></data>
+  <data name="Action_Arrange" xml:space="preserve"><value>Arrange</value></data>
+  <data name="Action_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Action_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Action_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="WidgetCount_One" xml:space="preserve"><value>1 widget</value></data>
+  <data name="WidgetCount_Other" xml:space="preserve"><value>{0} widgets</value></data>
+  <data name="Shape_16x9" xml:space="preserve"><value>16:9</value></data>
+  <data name="Shape_16x10" xml:space="preserve"><value>16:10</value></data>
+  <data name="Shape_4x3" xml:space="preserve"><value>4:3</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Settings_NameRequired" xml:space="preserve"><value>Give the display a name.</value></data>
+  <data name="Settings_Shape" xml:space="preserve"><value>Screen shape</value></data>
+  <data name="Settings_ShapeHelp" xml:space="preserve"><value>The layout editor is framed like the real screen.</value></data>
+  <data name="Settings_Shape16x9" xml:space="preserve"><value>16:9 (most TVs and monitors)</value></data>
+  <data name="Settings_Shape16x10" xml:space="preserve"><value>16:10 (many tablets)</value></data>
+  <data name="Settings_Shape4x3" xml:space="preserve"><value>4:3 (older tablets)</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Display language</value></data>
+  <data name="Settings_LanguageHelp" xml:space="preserve"><value>The person's first language. Independent of the device and of this portal.</value></data>
+  <data name="Settings_BackupLanguage" xml:space="preserve"><value>Backup language</value></data>
+  <data name="Settings_BackupLanguageHelp" xml:space="preserve"><value>Used when text is missing in the display language.</value></data>
+  <data name="Settings_TimeZone" xml:space="preserve"><value>Time zone</value></data>
+  <data name="Settings_TimeZoneRequired" xml:space="preserve"><value>Choose a time zone.</value></data>
+  <data name="Settings_NightHours" xml:space="preserve"><value>Night hours</value></data>
+  <data name="Settings_NightHoursHelp" xml:space="preserve"><value>Between these hours the screen dims and says it is night-time. Set both to the same time to turn this off.</value></data>
+  <data name="Settings_NightBegins" xml:space="preserve"><value>Night begins</value></data>
+  <data name="Settings_NightEnds" xml:space="preserve"><value>Night ends</value></data>
+  <data name="Saved" xml:space="preserve"><value>Saved. The screen will update in a moment.</value></data>
+  <data name="Conflict" xml:space="preserve"><value>Someone else changed this display first. Reload to see their changes before saving.</value></data>
+  <data name="Arrange_Title" xml:space="preserve"><value>Arrange</value></data>
+  <data name="Arrange_Unsaved" xml:space="preserve"><value>Unsaved changes</value></data>
+  <data name="Arrange_Hint" xml:space="preserve"><value>Drag to move. Drag the corner to resize. Select a widget to change its text size.</value></data>
+  <data name="Arrange_TextSize" xml:space="preserve"><value>Text size: {0}×</value></data>
+  <data name="Arrange_HighContrast" xml:space="preserve"><value>High contrast</value></data>
+  <data name="Arrange_Shown" xml:space="preserve"><value>Shown on the screen</value></data>
+  <data name="Arrange_Remove" xml:space="preserve"><value>Remove from screen</value></data>
+  <data name="Arrange_AddWidget" xml:space="preserve"><value>Add a widget</value></data>
+  <data name="Arrange_LeaveWarning" xml:space="preserve"><value>You have unsaved changes. Navigate again to leave without saving.</value></data>
+  <data name="Arrange_WidgetSettings" xml:space="preserve"><value>Widget settings</value></data>
+  <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Widget_NoSettings" xml:space="preserve"><value>This widget has no settings.</value></data>
+  <data name="Settings_TimeZoneHelp" xml:space="preserve"><value>Type a city in English, for example Athens or London.</value></data>
+  <data name="Today_Title" xml:space="preserve"><value>Today</value></data>
+  <data name="Today_Empty" xml:space="preserve"><value>Nothing to do today.</value></data>
+  <data name="Role_Owner" xml:space="preserve"><value>Owner</value></data>
+  <data name="Role_Family" xml:space="preserve"><value>Family</value></data>
+  <data name="Role_Caregiver" xml:space="preserve"><value>Caregiver</value></data>
+</root>

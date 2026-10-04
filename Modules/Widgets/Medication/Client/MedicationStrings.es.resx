@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="WidgetName" xml:space="preserve"><value>Recordatorios de medicación</value></data>
+  <data name="TimeFor_Morning" xml:space="preserve"><value>Es la hora de la medicación de la mañana.</value></data>
+  <data name="TimeFor_Midday" xml:space="preserve"><value>Es la hora de la medicación del mediodía.</value></data>
+  <data name="TimeFor_Afternoon" xml:space="preserve"><value>Es la hora de la medicación de la tarde.</value></data>
+  <data name="TimeFor_Evening" xml:space="preserve"><value>Es la hora de la medicación de la noche.</value></data>
+  <data name="TimeFor_Night" xml:space="preserve"><value>Es la hora de la medicación de antes de dormir.</value></data>
+  <data name="Taken_Morning" xml:space="preserve"><value>Medicación de la mañana: tomada a las {0}.</value></data>
+  <data name="Taken_Midday" xml:space="preserve"><value>Medicación del mediodía: tomada a las {0}.</value></data>
+  <data name="Taken_Afternoon" xml:space="preserve"><value>Medicación de la tarde: tomada a las {0}.</value></data>
+  <data name="Taken_Evening" xml:space="preserve"><value>Medicación de la noche: tomada a las {0}.</value></data>
+  <data name="Taken_Night" xml:space="preserve"><value>Medicación de antes de dormir: tomada a las {0}.</value></data>
+  <data name="NextDoseAt" xml:space="preserve"><value>Próxima medicación a las {0}.</value></data>
+  <data name="Settings_ShowInstructions" xml:space="preserve"><value>Mostrar las instrucciones</value></data>
+  <data name="Settings_ShowNextDose" xml:space="preserve"><value>Mostrar la próxima toma entre tomas</value></data>
+  <data name="Settings_TakenVisibleMinutes" xml:space="preserve"><value>Minutos que permanece el mensaje de «tomada»</value></data>
+</root>

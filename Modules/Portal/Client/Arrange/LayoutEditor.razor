@@ -1,0 +1,261 @@
+@*
+    The Arrange editor (ARCHITECTURE.md §13): the layout framed as the real screen, gridstack owns the grid's DOM
+    geometry, Blazor owns the model. Nothing reaches the screen until Save.
+*@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject IWidgetCatalog Catalog
+@inject TimeProvider Clock
+
+<div class="kl-editor">
+    <div class="kl-editor__frame kl-editor__frame--@ShapeClass" @ref="_frame">
+        <div class="kl-editor__bezel">
+            <div class="grid-stack kl-editor__grid" @ref="_grid">
+                <CascadingValue Value="_context" IsFixed="true">
+                    @foreach (var item in Items)
+                    {
+                        var definition = Catalog.Find(item.TypeKey);
+                        <div @key="item.Id"
+                             class="grid-stack-item"
+                             gs-id="@item.Id"
+                             gs-x="@item.X" gs-y="@item.Y" gs-w="@item.Width" gs-h="@item.Height"
+                             gs-min-w="@(definition?.MinSize.Width ?? 1)" gs-min-h="@(definition?.MinSize.Height ?? 1)">
+                            <div class="grid-stack-item-content kl-tile @(item.Id == SelectedId ? "kl-tile--selected" : null) @(item.IsEnabled ? null : "kl-tile--disabled") @(item.HighContrast ? "kl-tile--contrast" : null)"
+                                 style="--font-scale: @item.FontScale.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                 @onclick="() => Select(item)"
+                                 role="button" tabindex="0" aria-label="@NameOf(item)">
+                                <div class="kl-tile__preview">
+                                    <WidgetView Placement="item.ToPlacement()" Data="SampleDataFor(item)" />
+                                </div>
+                                <span class="kl-tile__label">@NameOf(item)</span>
+                            </div>
+                        </div>
+                    }
+                </CascadingValue>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ElementReference _grid;
+    private ElementReference _frame;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _handle;
+    private DotNetObjectReference<LayoutEditor>? _self;
+    private readonly HashSet<Guid> _adopted = [];
+    private readonly Dictionary<Guid, object?> _sampleData = [];
+    private DisplayContext _context = default!;
+    private ScreenShape _shapeApplied;
+
+    /// <summary>The placements being edited. The editor mutates these in place and reports every change.</summary>
+    [Parameter, EditorRequired]
+    public required List<EditablePlacement> Items { get; set; }
+
+    /// <summary>The display's shape, which frames the editor.</summary>
+    [Parameter]
+    public ScreenShape Shape { get; set; } = ScreenShape.Wide16x9;
+
+    /// <summary>The display's language, used for previews.</summary>
+    [Parameter]
+    public string Culture { get; set; } = "en";
+
+    /// <summary>The display's IANA time zone, used for previews.</summary>
+    [Parameter]
+    public string? TimeZoneId { get; set; }
+
+    /// <summary>The selected placement, if any.</summary>
+    [Parameter]
+    public Guid? SelectedId { get; set; }
+
+    /// <summary>Raised when the selection changes.</summary>
+    [Parameter]
+    public EventCallback<Guid?> SelectedIdChanged { get; set; }
+
+    /// <summary>Raised whenever a position or size changes.</summary>
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private string ShapeClass => Shape switch
+    {
+        ScreenShape.Wide16x10 => "16x10",
+        ScreenShape.Standard4x3 => "4x3",
+        _ => "16x9",
+    };
+
+    private double Aspect => Shape switch
+    {
+        ScreenShape.Wide16x10 => 16.0 / 10.0,
+        ScreenShape.Standard4x3 => 4.0 / 3.0,
+        _ => 16.0 / 9.0,
+    };
+
+    protected override void OnParametersSet()
+    {
+        var culture = SafeCulture(Culture);
+        var timeZone = SafeTimeZone(TimeZoneId);
+        if (_context is null || !_context.Culture.Equals(culture) || !_context.TimeZone.Equals(timeZone))
+        {
+            // Previews always show daytime content, so NightMode is off here.
+            _context = new DisplayContext(culture, null, timeZone, Clock, NightMode.Off);
+            _sampleData.Clear();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _self = DotNetObjectReference.Create(this);
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/KinLight.Modules.Portal.Client/js/layout-editor.js");
+            _handle = await _module.InvokeAsync<IJSObjectReference>("create", _grid, _frame, _self, new { columns = BoardGrid.Columns, aspect = Aspect });
+            foreach (var item in Items)
+            {
+                _adopted.Add(item.Id);
+            }
+
+            _shapeApplied = Shape;
+            return;
+        }
+
+        if (_handle is null || _module is null)
+        {
+            return;
+        }
+
+        // Items Blazor rendered since last time: hand them to gridstack.
+        foreach (var item in Items.Where(i => !_adopted.Contains(i.Id)).ToList())
+        {
+            await _module.InvokeVoidAsync("adopt", _handle, item.Id);
+            _adopted.Add(item.Id);
+        }
+
+        if (_shapeApplied != Shape)
+        {
+            _shapeApplied = Shape;
+            await _module.InvokeVoidAsync("setAspect", _handle, _frame, Aspect);
+        }
+    }
+
+    /// <summary>Removes a placement: gridstack lets go first, then Blazor removes the element.</summary>
+    public async Task RemoveAsync(EditablePlacement item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        if (_module is not null && _handle is not null)
+        {
+            await _module.InvokeVoidAsync("detach", _handle, item.Id);
+        }
+
+        _adopted.Remove(item.Id);
+        Items.Remove(item);
+        if (SelectedId == item.Id)
+        {
+            await SelectedIdChanged.InvokeAsync(null);
+        }
+
+        await Changed.InvokeAsync();
+    }
+
+    /// <summary>Called by gridstack through JS interop when items move or resize.</summary>
+    [JSInvokable]
+    public async Task OnGridChanged(GridItemChange[] changes)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+
+        var anyChanged = false;
+        foreach (var change in changes)
+        {
+            var item = Items.FirstOrDefault(i => i.Id == change.Id);
+            if (item is null)
+            {
+                continue;
+            }
+
+            if (item.X != change.X || item.Y != change.Y || item.Width != change.W || item.Height != change.H)
+            {
+                item.X = change.X;
+                item.Y = change.Y;
+                item.Width = change.W;
+                item.Height = change.H;
+                anyChanged = true;
+            }
+        }
+
+        if (anyChanged)
+        {
+            await Changed.InvokeAsync();
+            StateHasChanged();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null && _handle is not null)
+            {
+                await _module.InvokeVoidAsync("dispose", _handle);
+                await _handle.DisposeAsync();
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+
+        _self?.Dispose();
+    }
+
+    private Task Select(EditablePlacement item) => SelectedIdChanged.InvokeAsync(item.Id == SelectedId ? null : item.Id);
+
+    private string NameOf(EditablePlacement item)
+    {
+        var definition = Catalog.Find(item.TypeKey);
+        return definition is null ? item.TypeKey : WidgetNames.NameOf(definition, System.Globalization.CultureInfo.CurrentUICulture);
+    }
+
+    private object? SampleDataFor(EditablePlacement item)
+    {
+        if (!_sampleData.TryGetValue(item.Id, out var data))
+        {
+            data = Catalog.Find(item.TypeKey)?.CreateSampleData(_context);
+            _sampleData[item.Id] = data;
+        }
+
+        return data;
+    }
+
+    private static TimeZoneInfo SafeTimeZone(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return TimeZoneInfo.Local;
+        }
+
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(id);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Local;
+        }
+        catch (InvalidTimeZoneException)
+        {
+            return TimeZoneInfo.Local;
+        }
+    }
+
+    private static System.Globalization.CultureInfo SafeCulture(string name)
+    {
+        try
+        {
+            return System.Globalization.CultureInfo.GetCultureInfo(name);
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            return System.Globalization.CultureInfo.CurrentCulture;
+        }
+    }
+}

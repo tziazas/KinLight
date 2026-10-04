@@ -1,0 +1,48 @@
+@inherits WidgetComponentBase<ClockSettings>
+@implements IDisposable
+
+<div class="kl-clock" lang="@Context.Culture.Name">
+    <p class="kl-clock__sentence">@Sentence</p>
+    @if (Settings.ShowTime)
+    {
+        <p class="kl-clock__time">@Now.ToString("t", Context.Culture)</p>
+    }
+    @if (Settings.ShowDate && !Context.IsNight)
+    {
+        <p class="kl-clock__date">@Now.ToString("D", Context.Culture)</p>
+    }
+</div>
+
+@code {
+    private Timer? _timer;
+
+    private DateTime Now => Context.LocalNow;
+
+    protected override void OnInitialized()
+    {
+        // Re-render on the minute, so the time is never stale by more than a second or so.
+        var now = Now;
+        var untilNextMinute = TimeSpan.FromSeconds(60 - now.Second) - TimeSpan.FromMilliseconds(now.Millisecond);
+        _timer = new Timer(_ => InvokeAsync(StateHasChanged), null, untilNextMinute, TimeSpan.FromMinutes(1));
+    }
+
+    public void Dispose() => _timer?.Dispose();
+
+    private string Sentence
+    {
+        get
+        {
+            var now = Now;
+            var weekday = Context.Culture.DateTimeFormat.GetDayName(now.DayOfWeek);
+            var strings = Strings<ClockStrings>();
+
+            return DayParts.For(TimeOnly.FromDateTime(now), Context.IsNight) switch
+            {
+                DayPart.Night => strings[ClockStrings.ItIsNight],
+                DayPart.Morning => strings[ClockStrings.ItIsMorning, weekday],
+                DayPart.Afternoon => strings[ClockStrings.ItIsAfternoon, weekday],
+                _ => strings[ClockStrings.ItIsEvening, weekday],
+            };
+        }
+    }
+}

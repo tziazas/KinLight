@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Photos widget, portal side: the household photo library page (upload, caption, albums, delete) and the album
+    picker used by the generated settings form. Plugs into the portal through IPortalNavItem (ARCHITECTURE.md §13).
+    May use MudBlazor because it is only ever loaded by the portal, never by the display.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight photos widget: portal pages for the household photo library.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Client/KinLight.Modules.Widgets.Photos.Client.csproj" />
+    <ProjectReference Include="../../../Portal/Client/KinLight.Modules.Portal.Client.csproj" />
+  </ItemGroup>
+
+</Project>

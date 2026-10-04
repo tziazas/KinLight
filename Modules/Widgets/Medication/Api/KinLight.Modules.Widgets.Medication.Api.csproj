@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Medication reminders, server side: builds the display's dose data for today, and detects missed doses so the host
+    can alert the household (ARCHITECTURE.md §13 Notifications). Notification text never contains medication names,
+    doses or the person's name. Server only; references its own Client and Abstractions.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight medication widget data provider and missed-dose detection.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Client/KinLight.Modules.Widgets.Medication.Client.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,65 @@
+@inherits WidgetComponentBase<CalendarSettings, CalendarData>
+
+<div class="kl-calendar" lang="@Context.Culture.Name">
+    <p class="kl-calendar__heading">@T[CalendarStrings.Today]</p>
+    @if (Upcoming.Count == 0)
+    {
+        <p class="kl-calendar__empty">@T[CalendarStrings.NothingMoreToday]</p>
+    }
+    else
+    {
+        <ul class="kl-calendar__list">
+            @foreach (var item in Upcoming)
+            {
+                <li class="kl-calendar__event">
+                    <span class="kl-calendar__time">@TimeLabel(item)</span>
+                    <span class="kl-calendar__title">@Context.Resolve(item.Title)</span>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private IWidgetStrings T => Strings<CalendarStrings>();
+
+    // Upcoming, not past (ARCHITECTURE.md §3): events that have already ended are not shown.
+    private IReadOnlyList<CalendarEventItem> Upcoming
+    {
+        get
+        {
+            if (Data is null)
+            {
+                return [];
+            }
+
+            var now = TimeOnly.FromDateTime(Context.LocalNow);
+            return Data.Events
+                .Where(e => e.IsAllDay ? Settings.ShowAllDayEvents : !HasEnded(e, now))
+                .Take(Settings.MaxEvents)
+                .ToList();
+        }
+    }
+
+    private static bool HasEnded(CalendarEventItem e, TimeOnly now)
+    {
+        var end = e.End ?? e.Start;
+        if (end is null)
+        {
+            return false;
+        }
+
+        // An end earlier than the start means the event runs past midnight: it has not ended today.
+        if (e.Start is not null && end < e.Start)
+        {
+            return false;
+        }
+
+        return end <= now;
+    }
+
+    private string TimeLabel(CalendarEventItem item)
+        => item.IsAllDay || item.Start is null
+            ? T[CalendarStrings.AllDay]
+            : item.Start.Value.ToString("t", Context.Culture);
+}

@@ -1,0 +1,93 @@
+@using System.Globalization
+
+<MudDialog>
+    <DialogContent>
+        @if (ImageUrl is not null)
+        {
+            <div class="kl-photo-edit__img mb-3"><img src="@ImageUrl" alt="" /></div>
+        }
+        <MudStack Spacing="3">
+            <div>
+                <LocalizedTextEditor Value="Caption" Languages="Languages" Label="@T[PhotosPortalStrings.Photos_Caption]" />
+                <MudText Typo="Typo.caption">@T[PhotosPortalStrings.Photos_CaptionHelp]</MudText>
+            </div>
+            <MudAutocomplete T="string" @bind-Value="_albumInput" Label="@T[PhotosPortalStrings.Photos_Albums]" HelperText="@T[PhotosPortalStrings.Photos_AlbumsHelp]"
+                             SearchFunc="SearchAlbums" CoerceText="false" CoerceValue="true" OnKeyDown="OnAlbumKeyDown" Clearable="true" Immediate="true" />
+            @if (Albums.Count > 0)
+            {
+                <MudChipSet T="string" AllClosable="true" OnClose="chip => Albums.Remove(chip.Value!)">
+                    @foreach (var album in Albums)
+                    {
+                        <MudChip T="string" Value="@album" Color="Color.Secondary" Variant="Variant.Text">@album</MudChip>
+                    }
+                </MudChipSet>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="() => Dialog.Cancel()">@T[PhotosPortalStrings.Photos_Cancel]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">@T[PhotosPortalStrings.Photos_Save]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private string? _albumInput;
+
+    private static IWidgetStrings T => WidgetStrings.For<PhotosPortalStrings>(CultureInfo.CurrentUICulture);
+
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>Caption being edited in place.</summary>
+    [Parameter, EditorRequired]
+    public required LocalizedText Caption { get; set; }
+
+    /// <summary>Albums being edited in place.</summary>
+    [Parameter, EditorRequired]
+    public required List<string> Albums { get; set; }
+
+    /// <summary>Languages to offer.</summary>
+    [Parameter]
+    public IReadOnlyList<string> Languages { get; set; } = ["en"];
+
+    /// <summary>Preview image.</summary>
+    [Parameter]
+    public string? ImageUrl { get; set; }
+
+    /// <summary>Albums already used by other photos, for suggestions.</summary>
+    [Parameter]
+    public IReadOnlyList<string> KnownAlbums { get; set; } = [];
+
+    private Task<IEnumerable<string>> SearchAlbums(string? value, CancellationToken cancellationToken)
+    {
+        IEnumerable<string> result = string.IsNullOrWhiteSpace(value)
+            ? KnownAlbums
+            : KnownAlbums.Where(a => a.Contains(value, StringComparison.CurrentCultureIgnoreCase));
+        return Task.FromResult(result.Except(Albums, StringComparer.CurrentCultureIgnoreCase));
+    }
+
+    private void OnAlbumKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            AddAlbum();
+        }
+    }
+
+    private void AddAlbum()
+    {
+        var name = _albumInput?.Trim();
+        if (!string.IsNullOrEmpty(name) && !Albums.Contains(name, StringComparer.CurrentCultureIgnoreCase))
+        {
+            Albums.Add(name);
+        }
+
+        _albumInput = null;
+    }
+
+    private void Save()
+    {
+        AddAlbum();
+        Dialog.Close(DialogResult.Ok((Caption, Albums)));
+    }
+}

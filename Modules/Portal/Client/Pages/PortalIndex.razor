@@ -1,0 +1,9 @@
+@page "/portal"
+@layout PortalLayout
+@inject NavigationManager Navigation
+@inject ICurrentMember Member
+
+@code {
+    // Caregivers land on Today (ARCHITECTURE.md §13); everyone else on Displays.
+    protected override void OnInitialized() => Navigation.NavigateTo(Member.Role == MemberRole.Caregiver ? "portal/today" : "portal/displays", replace: true);
+}

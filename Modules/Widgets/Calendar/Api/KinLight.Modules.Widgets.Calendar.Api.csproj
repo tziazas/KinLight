@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Calendar widget, server side (ARCHITECTURE.md §14): fetches a Google Calendar secret iCal address
+    (no OAuth), parses it with Ical.Net, and produces today's events for the display.
+    The feed address is a secret: it is obtained through ICalendarFeedStore (stored encrypted by the host)
+    and never written to logs or sent to the display.
+    Server only. References its own Client and Abstractions; never another widget, Display or Portal.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight calendar widget data provider (iCal feed parsing).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ical.Net" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Client/KinLight.Modules.Widgets.Calendar.Client.csproj" />
+  </ItemGroup>
+
+</Project>

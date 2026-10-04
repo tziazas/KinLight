@@ -1,0 +1,150 @@
+@page "/portal/medications"
+@layout PortalLayout
+@implements IDisposable
+@inject IMedicationApi Api
+@inject IPortalApi Portal
+@inject ICurrentMember Member
+@inject NavigationManager Navigation
+@inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+@inject TimeProvider Clock
+
+<PageTitle>@T[MedicationPortalStrings.Schedules_Title]</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4" Spacing="2">
+    <MudText Typo="Typo.h4">@T[MedicationPortalStrings.Schedules_Title]</MudText>
+    <MudSpacer />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="() => EditAsync(null)">@T[MedicationPortalStrings.Schedules_Add]</MudButton>
+</MudStack>
+
+<MudAlert Severity="Severity.Info" Class="mb-4" Dense="true">@T[MedicationPortalStrings.Supplement]</MudAlert>
+
+@if (_schedules is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_schedules.Count == 0)
+{
+    <MudAlert Severity="Severity.Normal">@T[MedicationPortalStrings.Schedules_Empty]</MudAlert>
+}
+else
+{
+    <MudStack Spacing="2" Class="mb-6">
+        @foreach (var s in _schedules.OrderByDescending(s => s.IsActive).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase))
+        {
+            <MudPaper Outlined="true" Class="pa-3">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+                    <div style="flex:1 1 14rem; min-inline-size:0">
+                        <MudText Typo="Typo.h6">@s.Name @if (!s.IsActive) { <MudChip T="string" Size="Size.Small">@T[MedicationPortalStrings.Schedules_Inactive]</MudChip> }</MudText>
+                        <MudText Typo="Typo.body2">@MedicationText.Summary(s)</MudText>
+                        @if (s.Instructions.Resolve(CultureInfo.CurrentUICulture) is { Length: > 0 } instructions)
+                        {
+                            <MudText Typo="Typo.caption">@instructions</MudText>
+                        }
+                    </div>
+                    <MudSpacer />
+                    <MudButton StartIcon="@Icons.Material.Filled.Edit" OnClick="() => EditAsync(s)">@T[MedicationPortalStrings.Edit_Edit]</MudButton>
+                    <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => DeleteAsync(s)">@T[MedicationPortalStrings.Edit_Delete]</MudButton>
+                </MudStack>
+            </MudPaper>
+        }
+    </MudStack>
+}
+
+<MudText Typo="Typo.h5" Class="mb-2">@T[MedicationPortalStrings.History_Title]</MudText>
+@if (_history is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_history.Count == 0)
+{
+    <MudText Typo="Typo.body2">@T[MedicationPortalStrings.History_Empty]</MudText>
+}
+else
+{
+    <MudSimpleTable Dense="true" Hover="true">
+        <tbody>
+            @foreach (var (date, dose) in _history)
+            {
+                <tr>
+                    <td>@date.ToString("ddd d MMM", CultureInfo.CurrentCulture)</td>
+                    <td>@MedicationText.Time(dose.At)</td>
+                    <td>@dose.Schedule.Name</td>
+                    <td><MudChip T="string" Size="Size.Small" Color="@(dose.Status == DoseStatus.Taken ? Color.Success : dose.Status == DoseStatus.Missed ? Color.Error : Color.Default)">@MedicationText.StatusLabel(dose.Status)</MudChip></td>
+                    <td>@(dose.Confirmation?.ConfirmedByName)</td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+}
+
+@code {
+    private IReadOnlyList<MedicationSchedule>? _schedules;
+    private IReadOnlyList<(DateOnly Date, DayDose Dose)>? _history;
+
+    private static IWidgetStrings T => MedicationText.T;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Caregivers do not manage schedules (ARCHITECTURE.md §13). The server enforces this too.
+        if (Member.Role == MemberRole.Caregiver)
+        {
+            Navigation.NavigateTo("portal/today", replace: true);
+            return;
+        }
+
+        Api.Changed += RefreshAsync;
+        await RefreshAsync();
+    }
+
+    public void Dispose() => Api.Changed -= RefreshAsync;
+
+    private async Task RefreshAsync()
+    {
+        var now = Clock.GetLocalNow().DateTime;
+        var today = DateOnly.FromDateTime(now);
+        _schedules = await Api.ListSchedulesAsync(CancellationToken.None);
+        var confirmations = await Api.ListConfirmationsAsync(today.AddDays(-6), today, CancellationToken.None);
+
+        var history = new List<(DateOnly, DayDose)>();
+        for (var i = 0; i < 7; i++)
+        {
+            var date = today.AddDays(-i);
+            var localNow = i == 0 ? now : date.ToDateTime(TimeOnly.MaxValue);
+            history.AddRange(DoseLogic.BuildDay(_schedules, confirmations, date, localNow)
+                .Where(d => d.Status != DoseStatus.Upcoming)
+                .OrderByDescending(d => d.At)
+                .Select(d => (date, d)));
+        }
+
+        _history = history;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task EditAsync(MedicationSchedule? existing)
+    {
+        var languages = await Portal.GetDisplayLanguagesAsync(CancellationToken.None);
+        var parameters = new DialogParameters<ScheduleEditDialog>
+        {
+            // A new schedule starts today, so history does not show "missed" doses from before it existed.
+            { d => d.Schedule, existing ?? new MedicationSchedule { Doses = [new DoseTime(new TimeOnly(8, 0), 60)], StartsOn = DateOnly.FromDateTime(Clock.GetLocalNow().DateTime) } },
+            { d => d.Languages, languages },
+        };
+        var dialog = await Dialogs.ShowAsync<ScheduleEditDialog>(null, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true });
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: MedicationSchedule saved })
+        {
+            await Api.SaveScheduleAsync(saved, CancellationToken.None);
+            Snackbar.Add(T[MedicationPortalStrings.Saved], Severity.Success);
+        }
+    }
+
+    private async Task DeleteAsync(MedicationSchedule s)
+    {
+        var confirmed = await Dialogs.ShowMessageBoxAsync(T[MedicationPortalStrings.Edit_Delete], T[MedicationPortalStrings.Edit_DeleteConfirm], yesText: T[MedicationPortalStrings.Edit_Delete], cancelText: T[MedicationPortalStrings.Edit_Cancel]);
+        if (confirmed == true)
+        {
+            await Api.DeleteScheduleAsync(s.Id, CancellationToken.None);
+        }
+    }
+}

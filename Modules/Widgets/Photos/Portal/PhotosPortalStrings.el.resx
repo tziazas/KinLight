@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Photos" xml:space="preserve"><value>Φωτογραφίες</value></data>
+  <data name="Photos_Empty" xml:space="preserve"><value>Δεν υπάρχουν φωτογραφίες ακόμη. Προσθέστε την πρώτη· μπορεί να εμφανίζεται σε κάθε οθόνη.</value></data>
+  <data name="Photos_Add" xml:space="preserve"><value>Προσθήκη φωτογραφιών</value></data>
+  <data name="Photos_Caption" xml:space="preserve"><value>Ποιος είναι;</value></data>
+  <data name="Photos_CaptionHelp" xml:space="preserve"><value>Γράψτε ποιο είναι το πρόσωπο για αυτόν που βλέπει, π.χ. «Η Ερατώ, η κόρη σου». Οι φωτογραφίες χωρίς λεζάντα δεν δείχνουν τίποτα από κάτω.</value></data>
+  <data name="Photos_Albums" xml:space="preserve"><value>Άλμπουμ</value></data>
+  <data name="Photos_AlbumsHelp" xml:space="preserve"><value>Γράψτε ένα όνομα άλμπουμ και πατήστε Enter. Μια οθόνη μπορεί να δείχνει ένα άλμπουμ ή όλες τις φωτογραφίες.</value></data>
+  <data name="Photos_Edit" xml:space="preserve"><value>Επεξεργασία</value></data>
+  <data name="Photos_Delete" xml:space="preserve"><value>Διαγραφή</value></data>
+  <data name="Photos_DeleteConfirm" xml:space="preserve"><value>Να διαγραφεί αυτή η φωτογραφία από κάθε οθόνη;</value></data>
+  <data name="Photos_Save" xml:space="preserve"><value>Αποθήκευση</value></data>
+  <data name="Photos_Cancel" xml:space="preserve"><value>Άκυρο</value></data>
+  <data name="Photos_Added" xml:space="preserve"><value>Προστέθηκαν {0} φωτογραφίες.</value></data>
+  <data name="Photos_AddedOne" xml:space="preserve"><value>Προστέθηκε μία φωτογραφία.</value></data>
+  <data name="Photos_Saved" xml:space="preserve"><value>Αποθηκεύτηκε.</value></data>
+  <data name="Album_All" xml:space="preserve"><value>Όλες οι φωτογραφίες</value></data>
+</root>

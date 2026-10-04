@@ -1,0 +1,110 @@
+@page "/"
+@layout DisplayLayout
+@implements IAsyncDisposable
+@inject IDisplayApi Api
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+@*
+    The display's only page. Loads the configuration, renders the board, and refetches when the server pings.
+    If no configuration is available it shows a clock-only layout (ARCHITECTURE.md §11). Never an error.
+*@
+<div class="kl-screen">
+    @if (_config is not null)
+    {
+        <DisplayBoard Config="_config" />
+    }
+</div>
+
+@code {
+    private DisplayConfig? _config;
+    private readonly CancellationTokenSource _cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Api.ConfigChanged += ReloadAsync;
+        await ReloadAsync();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        Api.ConfigChanged -= ReloadAsync;
+        _cts.Cancel();
+        _cts.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            _config = await Api.GetConfigAsync(_cts.Token) ?? ClockOnly();
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception)
+        {
+            _config ??= ClockOnly();
+        }
+
+        if (await NeedsRestartForCultureAsync(_config))
+        {
+            // Culture is fixed at startup (ARCHITECTURE.md §11): reload so the runtime boots in the display's language.
+            Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+            return;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// True when the display's language differs from the culture the runtime booted with and the host's boot script
+    /// (wwwroot/js/boot.js, <c>window.kinlightDisplay</c>) agrees a reload is worth it. The script allows one reload per
+    /// culture per session, so a host that cannot read the config at boot never loops. Without the script, never reload.
+    /// </summary>
+    private async Task<bool> NeedsRestartForCultureAsync(DisplayConfig config)
+    {
+        if (config.DisplayId == Guid.Empty || IsSameOrParent(System.Globalization.CultureInfo.CurrentUICulture, config.Culture))
+        {
+            return false;
+        }
+
+        try
+        {
+            return await JS.InvokeAsync<bool>("kinlightDisplay.shouldReloadFor", _cts.Token, config.Culture);
+        }
+        catch (JSException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsSameOrParent(System.Globalization.CultureInfo current, string cultureName)
+    {
+        for (var c = current; !string.IsNullOrEmpty(c.Name); c = c.Parent)
+        {
+            if (string.Equals(c.Name, cultureName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static DisplayConfig ClockOnly() => new(
+        DisplayId: Guid.Empty,
+        Name: string.Empty,
+        Culture: System.Globalization.CultureInfo.CurrentCulture.Name,
+        FallbackCulture: null,
+        TimeZoneId: TimeZoneInfo.Local.Id,
+        NightMode: NightMode.Default,
+        ScreenShape: ScreenShape.Wide16x9,
+        Version: 0,
+        Widgets:
+        [
+            new WidgetPlacement(Guid.Empty, "kinlight.clock", X: 2, Y: 1, Width: 8, Height: 4),
+        ]);
+}

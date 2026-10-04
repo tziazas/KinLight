@@ -1,0 +1,158 @@
+@*
+    Today's doses with one large button per dose for the caregiver who gave it (ARCHITECTURE.md §13).
+    Designed for one hand on a phone: the next thing to do is at the top, nothing to scroll past.
+*@
+@implements IDisposable
+@inject IMedicationApi Api
+@inject ICurrentMember Member
+@inject ISnackbar Snackbar
+@inject TimeProvider Clock
+
+<MudPaper Class="pa-3" Elevation="1">
+    <MudText Typo="Typo.h6" Class="mb-2">@T[MedicationPortalStrings.Today_Section]</MudText>
+
+    @if (_day is null)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (_day.Count == 0 && _asNeeded.Count == 0)
+    {
+        <MudText Typo="Typo.body1">@T[MedicationPortalStrings.Today_NoDoses]</MudText>
+    }
+    else
+    {
+        <MudStack Spacing="2">
+            @foreach (var dose in _day.Where(d => !d.IsAsNeeded).OrderBy(d => d.Status == DoseStatus.Due ? 0 : d.Status == DoseStatus.Upcoming ? 1 : 2).ThenBy(d => d.At))
+            {
+                <MudPaper Outlined="true" Class="@DoseClass(dose)">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+                        <div class="kl-dose__main">
+                            <MudText Typo="Typo.h6">@MedicationText.Time(dose.At) · @dose.Schedule.Name</MudText>
+                            @if (dose.Schedule.Instructions.Resolve(CultureInfo.CurrentUICulture) is { Length: > 0 } instructions)
+                            {
+                                <MudText Typo="Typo.body2">@instructions</MudText>
+                            }
+                            @if (dose.Status == DoseStatus.Taken && dose.Confirmation is { } c)
+                            {
+                                <MudText Typo="Typo.caption">@T[MedicationPortalStrings.TakenBy, LocalTime(c.ConfirmedUtc), c.ConfirmedByName]</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption">@T[MedicationPortalStrings.Window, MedicationText.Time(dose.At), dose.WindowMinutes]</MudText>
+                            }
+                        </div>
+                        <MudSpacer />
+                        <MudChip T="string" Size="Size.Small" Color="@StatusColor(dose.Status)" Variant="Variant.Filled">@MedicationText.StatusLabel(dose.Status)</MudChip>
+                        @if (dose.Status != DoseStatus.Taken)
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Class="kl-dose__confirm"
+                                       StartIcon="@Icons.Material.Filled.Check" Disabled="_busy" OnClick="() => ConfirmAsync(dose)">
+                                @T[MedicationPortalStrings.Today_Confirm]
+                            </MudButton>
+                        }
+                    </MudStack>
+                </MudPaper>
+            }
+
+            @if (_asNeeded.Count > 0)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mt-2">@T[MedicationPortalStrings.Today_AsNeeded]</MudText>
+                @foreach (var schedule in _asNeeded)
+                {
+                    <MudPaper Outlined="true" Class="pa-3">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+                            <div class="kl-dose__main">
+                                <MudText Typo="Typo.h6">@schedule.Name</MudText>
+                                @{ var given = _day.Where(d => d.IsAsNeeded && d.Schedule.Id == schedule.Id).ToList(); }
+                                @foreach (var g in given)
+                                {
+                                    <MudText Typo="Typo.caption">@T[MedicationPortalStrings.TakenBy, MedicationText.Time(g.At), g.Confirmation!.ConfirmedByName]</MudText>
+                                }
+                            </div>
+                            <MudSpacer />
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Add" Disabled="_busy" OnClick="() => GiveNowAsync(schedule)">
+                                @T[MedicationPortalStrings.Today_GiveNow]
+                            </MudButton>
+                        </MudStack>
+                    </MudPaper>
+                }
+            }
+        </MudStack>
+    }
+
+    <MudText Typo="Typo.caption" Class="mt-3 d-block">@T[MedicationPortalStrings.Supplement]</MudText>
+</MudPaper>
+
+@code {
+    private IReadOnlyList<DayDose>? _day;
+    private IReadOnlyList<MedicationSchedule> _asNeeded = [];
+    private bool _busy;
+    private Timer? _timer;
+
+    private static IWidgetStrings T => MedicationText.T;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Api.Changed += RefreshAsync;
+        _timer = new Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+        await RefreshAsync();
+    }
+
+    public void Dispose()
+    {
+        Api.Changed -= RefreshAsync;
+        _timer?.Dispose();
+    }
+
+    private async Task RefreshAsync()
+    {
+        var now = Clock.GetLocalNow().DateTime;
+        var today = DateOnly.FromDateTime(now);
+        var schedules = await Api.ListSchedulesAsync(CancellationToken.None);
+        var confirmations = await Api.ListConfirmationsAsync(today, today, CancellationToken.None);
+        _day = DoseLogic.BuildDay(schedules, confirmations, today, now);
+        _asNeeded = schedules.Where(s => s.IsActive && s.Kind == ScheduleKind.AsNeeded).ToList();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ConfirmAsync(DayDose dose)
+    {
+        _busy = true;
+        try
+        {
+            var today = DateOnly.FromDateTime(Clock.GetLocalNow().DateTime);
+            await Api.ConfirmAsync(new ConfirmDoseRequest(dose.Schedule.Id, today, dose.At), CancellationToken.None);
+            Snackbar.Add(T[MedicationPortalStrings.Confirmed], Severity.Success);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task GiveNowAsync(MedicationSchedule schedule)
+    {
+        _busy = true;
+        try
+        {
+            await Api.LogAsNeededAsync(schedule.Id, CancellationToken.None);
+            Snackbar.Add(T[MedicationPortalStrings.Confirmed], Severity.Success);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private static string DoseClass(DayDose dose) => "pa-3 kl-dose kl-dose--" + dose.Status.ToString().ToLowerInvariant();
+
+    private static string LocalTime(DateTimeOffset utc) => utc.ToLocalTime().ToString("t", CultureInfo.CurrentCulture);
+
+    private static Color StatusColor(DoseStatus status) => status switch
+    {
+        DoseStatus.Due => Color.Warning,
+        DoseStatus.Taken => Color.Success,
+        DoseStatus.Missed => Color.Error,
+        _ => Color.Default,
+    };
+}

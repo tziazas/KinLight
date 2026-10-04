@@ -1,0 +1,1 @@
+gridstack.js 14.0.0 (MIT), vendored from the npm package "gridstack". Files: gridstack-all.js (UMD bundle), gridstack.min.css. Do not edit; replace all files together when upgrading.

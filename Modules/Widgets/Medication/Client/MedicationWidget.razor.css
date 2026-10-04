@@ -1,0 +1,47 @@
+.kl-med {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    block-size: 100%;
+    padding-inline: 0.6em;
+    box-sizing: border-box;
+    font-size: calc(var(--kl-base-font, 1rem) * var(--font-scale, 1));
+    line-height: 1.25;
+    border-radius: inherit;
+}
+
+.kl-med p,
+.kl-med ul {
+    margin: 0;
+}
+
+.kl-med__sentence {
+    font-size: 2.2em;
+    font-weight: 700;
+}
+
+.kl-med__instructions {
+    list-style: none;
+    padding: 0;
+    margin-block-start: 0.3em;
+    font-size: 1.6em;
+}
+
+/* Due: a calm but unmistakable band in the portal's sage, white text. */
+.kl-med--due {
+    background: #5E7F63;
+    color: #fff;
+}
+
+/* Taken: quiet confirmation. */
+.kl-med--taken .kl-med__sentence {
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+/* Next: smallest and lightest. */
+.kl-med--next .kl-med__sentence {
+    font-size: 1.5em;
+    font-weight: 500;
+    opacity: 0.85;
+}

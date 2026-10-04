@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Medication reminders, browser side (ARCHITECTURE.md §2 rule 6, §13, §14).
+    The display shows a large reminder during a dose window and never a button: the person living with dementia is
+    never asked to confirm a dose. The caregiver who gives it confirms on the portal's Today page; the log records who
+    and when. Reminders are a supplement, never the safety mechanism.
+    Holds the scheduling model and the pure dose-status logic shared by display, portal and server. Browser-safe.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight medication reminders widget: model, dose logic, display view, strings.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

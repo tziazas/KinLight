@@ -1,0 +1,172 @@
+@page "/portal/photos"
+@layout PortalLayout
+@using System.Globalization
+@inject IPhotoLibraryApi Library
+@inject IPortalApi Portal
+@inject ICurrentMember Member
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService Dialogs
+
+<PageTitle>@T[PhotosPortalStrings.Nav_Photos]</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4" Spacing="2">
+    <MudText Typo="Typo.h4">@T[PhotosPortalStrings.Nav_Photos]</MudText>
+    <MudSpacer />
+    <MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept="image/*" FilesChanged="UploadAsync" MaximumFileCount="20" Disabled="_busy">
+        <CustomContent Context="upload">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddPhotoAlternate" Disabled="_busy" OnClick="() => upload.OpenFilePickerAsync()">@T[PhotosPortalStrings.Photos_Add]</MudButton>
+        </CustomContent>
+        <SelectedTemplate></SelectedTemplate>
+    </MudFileUpload>
+</MudStack>
+
+@if (_busy)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
+}
+
+@if (_photos is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_photos.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">@T[PhotosPortalStrings.Photos_Empty]</MudAlert>
+}
+else
+{
+    <MudGrid Spacing="2">
+        @foreach (var photo in _photos)
+        {
+            <MudItem xs="6" sm="4" md="3" @key="photo.Id">
+                <MudCard Elevation="1" Class="kl-photo-card">
+                    <div class="kl-photo-card__img">
+                        @if (_urls.TryGetValue(photo.Id, out var url) && url is not null)
+                        {
+                            <img src="@url" alt="" loading="lazy" />
+                        }
+                    </div>
+                    <MudCardContent Class="py-2">
+                        <MudText Typo="Typo.body1" Class="kl-photo-card__caption">@(photo.Caption.Resolve(CultureInfo.CurrentUICulture) ?? "—")</MudText>
+                        @if (photo.Albums.Count > 0)
+                        {
+                            <MudText Typo="Typo.caption">@string.Join(" · ", photo.Albums)</MudText>
+                        }
+                    </MudCardContent>
+                    <MudCardActions Class="pt-0">
+                        <MudButton Size="Size.Small" StartIcon="@Icons.Material.Filled.Edit" OnClick="() => EditAsync(photo)">@T[PhotosPortalStrings.Photos_Edit]</MudButton>
+                        <MudButton Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => DeleteAsync(photo)">@T[PhotosPortalStrings.Photos_Delete]</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private const int MaxEdge = 1600;
+    private const double JpegQuality = 0.85;
+
+    private IReadOnlyList<PhotoItem>? _photos;
+    private readonly Dictionary<Guid, string?> _urls = [];
+    private IReadOnlyList<string> _languages = ["en"];
+    private bool _busy;
+
+    private static IWidgetStrings T => WidgetStrings.For<PhotosPortalStrings>(CultureInfo.CurrentUICulture);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Caregivers have no access to the photo library (ARCHITECTURE.md §13). The server enforces this too.
+        if (Member.Role == MemberRole.Caregiver)
+        {
+            Navigation.NavigateTo("portal/today", replace: true);
+            return;
+        }
+
+        _languages = await Portal.GetDisplayLanguagesAsync(CancellationToken.None);
+        await RefreshAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        _photos = await Library.ListAsync(CancellationToken.None);
+        foreach (var photo in _photos)
+        {
+            if (!_urls.ContainsKey(photo.Id))
+            {
+                _urls[photo.Id] = await Library.GetImageUrlAsync(photo.Id, CancellationToken.None);
+            }
+        }
+    }
+
+    private async Task UploadAsync(IReadOnlyList<IBrowserFile> files)
+    {
+        if (files.Count == 0)
+        {
+            return;
+        }
+
+        _busy = true;
+        var added = 0;
+        try
+        {
+            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/KinLight.Modules.Widgets.Photos.Portal/js/photo-resize.js");
+            foreach (var file in files)
+            {
+                // Hand the browser file to JS by URL: downscaling happens entirely in the browser.
+                await using var stream = file.OpenReadStream(50 * 1024 * 1024);
+                using var dotnetStream = new DotNetStreamReference(stream);
+                var jsFile = await JS.InvokeAsync<IJSObjectReference>("kinlightPhotos.fileFromStream", dotnetStream, file.ContentType);
+                var dataUrl = await module.InvokeAsync<string>("downscale", jsFile, MaxEdge, JpegQuality);
+                await jsFile.DisposeAsync();
+
+                var comma = dataUrl.IndexOf(',', StringComparison.Ordinal);
+                var bytes = Convert.FromBase64String(dataUrl[(comma + 1)..]);
+                await Library.UploadAsync(new PhotoUpload(bytes, "image/jpeg", file.Name, new LocalizedText(), []), CancellationToken.None);
+                added++;
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        await RefreshAsync();
+        Snackbar.Add(added == 1 ? T[PhotosPortalStrings.Photos_AddedOne] : T[PhotosPortalStrings.Photos_Added, added], Severity.Success);
+    }
+
+    private async Task EditAsync(PhotoItem photo)
+    {
+        var caption = new LocalizedText { Values = new(photo.Caption.Values, StringComparer.OrdinalIgnoreCase), Unreviewed = new(photo.Caption.Unreviewed, StringComparer.OrdinalIgnoreCase) };
+        var parameters = new DialogParameters<PhotoEditDialog>
+        {
+            { d => d.Caption, caption },
+            { d => d.Albums, photo.Albums.ToList() },
+            { d => d.Languages, _languages },
+            { d => d.ImageUrl, _urls.GetValueOrDefault(photo.Id) },
+            { d => d.KnownAlbums, _photos!.SelectMany(p => p.Albums).Distinct(StringComparer.CurrentCultureIgnoreCase).Order(StringComparer.CurrentCulture).ToList() },
+        };
+        var dialog = await Dialogs.ShowAsync<PhotoEditDialog>(null, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true });
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: (LocalizedText newCaption, List<string> newAlbums) })
+        {
+            await Library.UpdateAsync(photo.Id, newCaption, newAlbums, CancellationToken.None);
+            await RefreshAsync();
+            Snackbar.Add(T[PhotosPortalStrings.Photos_Saved], Severity.Success);
+        }
+    }
+
+    private async Task DeleteAsync(PhotoItem photo)
+    {
+        // No browser dialogs in the portal: MudBlazor's message box confirms destructive actions.
+        var confirmed = await Dialogs.ShowMessageBoxAsync(T[PhotosPortalStrings.Photos_Delete], T[PhotosPortalStrings.Photos_DeleteConfirm], yesText: T[PhotosPortalStrings.Photos_Delete], cancelText: T[PhotosPortalStrings.Photos_Cancel]);
+        if (confirmed == true)
+        {
+            await Library.DeleteAsync(photo.Id, CancellationToken.None);
+            _urls.Remove(photo.Id);
+            await RefreshAsync();
+        }
+    }
+}

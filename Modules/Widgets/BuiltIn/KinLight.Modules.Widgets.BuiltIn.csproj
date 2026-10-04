@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The single list of built-in widgets. The display and the portal both reference this project, so they
+    always agree on which widgets exist and what their TypeKeys are (ARCHITECTURE.md §14).
+    Browser-safe: references widget Client projects only, never a widget Api.
+    Adding a widget: reference its Client project and add one line to AddKinLightBuiltInWidgets().
+  -->
+
+  <PropertyGroup>
+    <Description>Registration of KinLight's built-in widgets.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+    <ProjectReference Include="../Clock/Client/KinLight.Modules.Widgets.Clock.Client.csproj" />
+    <ProjectReference Include="../Calendar/Client/KinLight.Modules.Widgets.Calendar.Client.csproj" />
+    <ProjectReference Include="../Photos/Client/KinLight.Modules.Widgets.Photos.Client.csproj" />
+    <ProjectReference Include="../Medication/Client/KinLight.Modules.Widgets.Medication.Client.csproj" />
+  </ItemGroup>
+
+</Project>

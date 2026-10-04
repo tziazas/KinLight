@@ -1,0 +1,76 @@
+.kl-editor {
+    inline-size: 100%;
+}
+
+/* The frame keeps the screen's real shape, so what the family sees is what the screen shows. */
+.kl-editor__frame {
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    /* Container units let previews use the same base-font rule as the real screen (2.2% of its height). */
+    container-type: size;
+}
+
+.kl-editor__frame--16x10 {
+    aspect-ratio: 16 / 10;
+}
+
+.kl-editor__frame--4x3 {
+    aspect-ratio: 4 / 3;
+}
+
+.kl-editor__bezel {
+    block-size: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    background: #14212b;
+    box-shadow: 0 0 0 6px #2a3a47, 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.kl-editor__grid {
+    block-size: 100%;
+    color: #f6f8fa;
+}
+
+.kl-tile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+    cursor: grab;
+}
+
+.kl-tile:focus-visible,
+.kl-tile--selected {
+    outline-color: #B7791F;
+}
+
+.kl-tile--disabled {
+    opacity: 0.4;
+}
+
+.kl-tile--contrast {
+    background: #000;
+    color: #fff;
+}
+
+/* Previews are scaled-down screens: never let them capture pointer events meant for drag or select. */
+.kl-tile__preview {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    --kl-base-font: 2.2cqh;
+}
+
+.kl-tile__label {
+    position: absolute;
+    inset-block-start: 0.25rem;
+    inset-inline-end: 0.25rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    font-size: 0.7rem;
+    pointer-events: none;
+}

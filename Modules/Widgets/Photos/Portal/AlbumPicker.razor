@@ -1,0 +1,44 @@
+@*
+    Settings editor for PhotosSettings.Album: choose one of the household's albums, or all photos.
+    Registered through AddWidgetSettingsEditor; receives Value / ValueChanged / Label from the generated form.
+*@
+@using System.Globalization
+@inject IPhotoLibraryApi Library
+
+<MudSelect T="string" Value="@(Value as string ?? string.Empty)" ValueChanged="OnChanged" Label="@Label">
+    <MudSelectItem T="string" Value="@string.Empty">@T[PhotosPortalStrings.Album_All]</MudSelectItem>
+    @foreach (var album in _albums)
+    {
+        <MudSelectItem T="string" Value="@album">@album</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    private List<string> _albums = [];
+
+    private static IWidgetStrings T => WidgetStrings.For<PhotosPortalStrings>(CultureInfo.CurrentUICulture);
+
+    /// <summary>Current album name, or null/empty for all.</summary>
+    [Parameter]
+    public object? Value { get; set; }
+
+    /// <summary>Raised with the new value.</summary>
+    [Parameter]
+    public EventCallback<object?> ValueChanged { get; set; }
+
+    /// <summary>Field label.</summary>
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var photos = await Library.ListAsync(CancellationToken.None);
+        _albums = photos.SelectMany(p => p.Albums).Distinct(StringComparer.CurrentCultureIgnoreCase).Order(StringComparer.CurrentCulture).ToList();
+        if (Value is string current && current.Length > 0 && !_albums.Contains(current, StringComparer.CurrentCultureIgnoreCase))
+        {
+            _albums.Insert(0, current);
+        }
+    }
+
+    private Task OnChanged(string value) => ValueChanged.InvokeAsync(string.IsNullOrEmpty(value) ? null : value);
+}

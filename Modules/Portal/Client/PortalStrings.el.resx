@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve"><value>KinLight</value></data>
+  <data name="Nav_Today" xml:space="preserve"><value>Σήμερα</value></data>
+  <data name="Nav_Displays" xml:space="preserve"><value>Οθόνες</value></data>
+  <data name="Displays_Title" xml:space="preserve"><value>Οθόνες</value></data>
+  <data name="Displays_Empty" xml:space="preserve"><value>Δεν υπάρχουν οθόνες ακόμη. Συνδέστε μια οθόνη από τη σελίδα «Συσκευές» για να ξεκινήσετε.</value></data>
+  <data name="Action_Arrange" xml:space="preserve"><value>Διάταξη</value></data>
+  <data name="Action_Settings" xml:space="preserve"><value>Ρυθμίσεις</value></data>
+  <data name="Action_Save" xml:space="preserve"><value>Αποθήκευση</value></data>
+  <data name="Action_Cancel" xml:space="preserve"><value>Άκυρο</value></data>
+  <data name="WidgetCount_One" xml:space="preserve"><value>1 στοιχείο</value></data>
+  <data name="WidgetCount_Other" xml:space="preserve"><value>{0} στοιχεία</value></data>
+  <data name="Shape_16x9" xml:space="preserve"><value>16:9</value></data>
+  <data name="Shape_16x10" xml:space="preserve"><value>16:10</value></data>
+  <data name="Shape_4x3" xml:space="preserve"><value>4:3</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Ρυθμίσεις</value></data>
+  <data name="Settings_Name" xml:space="preserve"><value>Όνομα</value></data>
+  <data name="Settings_NameRequired" xml:space="preserve"><value>Δώστε ένα όνομα στην οθόνη.</value></data>
+  <data name="Settings_Shape" xml:space="preserve"><value>Σχήμα οθόνης</value></data>
+  <data name="Settings_ShapeHelp" xml:space="preserve"><value>Ο επεξεργαστής διάταξης έχει το σχήμα της πραγματικής οθόνης.</value></data>
+  <data name="Settings_Shape16x9" xml:space="preserve"><value>16:9 (οι περισσότερες τηλεοράσεις και οθόνες)</value></data>
+  <data name="Settings_Shape16x10" xml:space="preserve"><value>16:10 (πολλά tablet)</value></data>
+  <data name="Settings_Shape4x3" xml:space="preserve"><value>4:3 (παλαιότερα tablet)</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Γλώσσα οθόνης</value></data>
+  <data name="Settings_LanguageHelp" xml:space="preserve"><value>Η μητρική γλώσσα του ατόμου. Ανεξάρτητη από τη συσκευή και από αυτή την πύλη.</value></data>
+  <data name="Settings_BackupLanguage" xml:space="preserve"><value>Εφεδρική γλώσσα</value></data>
+  <data name="Settings_BackupLanguageHelp" xml:space="preserve"><value>Χρησιμοποιείται όταν λείπει κείμενο στη γλώσσα της οθόνης.</value></data>
+  <data name="Settings_TimeZone" xml:space="preserve"><value>Ζώνη ώρας</value></data>
+  <data name="Settings_TimeZoneRequired" xml:space="preserve"><value>Επιλέξτε ζώνη ώρας.</value></data>
+  <data name="Settings_NightHours" xml:space="preserve"><value>Νυχτερινές ώρες</value></data>
+  <data name="Settings_NightHoursHelp" xml:space="preserve"><value>Μεταξύ αυτών των ωρών η οθόνη χαμηλώνει τη φωτεινότητα και δείχνει ότι είναι νύχτα. Ορίστε και τις δύο στην ίδια ώρα για να το απενεργοποιήσετε.</value></data>
+  <data name="Settings_NightBegins" xml:space="preserve"><value>Αρχή νύχτας</value></data>
+  <data name="Settings_NightEnds" xml:space="preserve"><value>Τέλος νύχτας</value></data>
+  <data name="Saved" xml:space="preserve"><value>Αποθηκεύτηκε. Η οθόνη θα ενημερωθεί σε λίγο.</value></data>
+  <data name="Conflict" xml:space="preserve"><value>Κάποιος άλλος άλλαξε αυτή την οθόνη πρώτος. Φορτώστε ξανά τη σελίδα για να δείτε τις αλλαγές του πριν αποθηκεύσετε.</value></data>
+  <data name="Arrange_Title" xml:space="preserve"><value>Διάταξη</value></data>
+  <data name="Arrange_Unsaved" xml:space="preserve"><value>Μη αποθηκευμένες αλλαγές</value></data>
+  <data name="Arrange_Hint" xml:space="preserve"><value>Σύρετε για μετακίνηση. Σύρετε τη γωνία για αλλαγή μεγέθους. Επιλέξτε ένα στοιχείο για να αλλάξετε το μέγεθος του κειμένου.</value></data>
+  <data name="Arrange_TextSize" xml:space="preserve"><value>Μέγεθος κειμένου: {0}×</value></data>
+  <data name="Arrange_HighContrast" xml:space="preserve"><value>Υψηλή αντίθεση</value></data>
+  <data name="Arrange_Shown" xml:space="preserve"><value>Εμφανίζεται στην οθόνη</value></data>
+  <data name="Arrange_Remove" xml:space="preserve"><value>Αφαίρεση από την οθόνη</value></data>
+  <data name="Arrange_AddWidget" xml:space="preserve"><value>Προσθήκη στοιχείου</value></data>
+  <data name="Arrange_LeaveWarning" xml:space="preserve"><value>Έχετε μη αποθηκευμένες αλλαγές. Πλοηγηθείτε ξανά για να φύγετε χωρίς αποθήκευση.</value></data>
+  <data name="Arrange_WidgetSettings" xml:space="preserve"><value>Ρυθμίσεις στοιχείου</value></data>
+  <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Widget_NoSettings" xml:space="preserve"><value>Αυτό το στοιχείο δεν έχει ρυθμίσεις.</value></data>
+  <data name="Settings_TimeZoneHelp" xml:space="preserve"><value>Γράψτε μια πόλη στα αγγλικά, π.χ. Athens ή London.</value></data>
+  <data name="Today_Title" xml:space="preserve"><value>Σήμερα</value></data>
+  <data name="Today_Empty" xml:space="preserve"><value>Δεν υπάρχει κάτι για σήμερα.</value></data>
+  <data name="Role_Owner" xml:space="preserve"><value>Ιδιοκτήτης</value></data>
+  <data name="Role_Family" xml:space="preserve"><value>Οικογένεια</value></data>
+  <data name="Role_Caregiver" xml:space="preserve"><value>Φροντιστής</value></data>
+</root>

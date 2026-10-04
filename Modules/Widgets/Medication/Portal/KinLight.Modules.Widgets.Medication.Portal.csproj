@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Medication reminders, portal side: the Medications page (schedules and history) and the Today section where the
+    caregiver who gave a dose confirms it with one tap (ARCHITECTURE.md §13). May use MudBlazor: only the portal loads it.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight medication widget: portal pages (Medications, Today section).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Client/KinLight.Modules.Widgets.Medication.Client.csproj" />
+    <ProjectReference Include="../../../Portal/Client/KinLight.Modules.Portal.Client.csproj" />
+  </ItemGroup>
+
+</Project>

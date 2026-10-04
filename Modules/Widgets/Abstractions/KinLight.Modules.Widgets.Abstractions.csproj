@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Widget contracts and small shared components every widget builds on (ARCHITECTURE.md §14).
+    Browser-safe: references only Shared and Blazor component packages. Never references a widget,
+    the display, the portal, Core, or server packages.
+  -->
+
+  <PropertyGroup>
+    <Description>Contracts and base components for KinLight widgets.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Shared/KinLight.Modules.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

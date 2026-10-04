@@ -1,0 +1,13 @@
+.kl-photo-edit__img {
+    aspect-ratio: 4 / 3;
+    background: #14212b;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.kl-photo-edit__img img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+    display: block;
+}
