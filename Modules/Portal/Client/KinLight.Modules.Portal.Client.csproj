@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Blazor WebAssembly class library for the KinLight portal: the app family members and caregivers
+    use (mostly on phones) to manage what a display shows.
+    This is a library, not the runnable portal app: a host references it and serves its components and assets.
+    Browser-safe: must never reference Core, EF Core, or any server-only package (ARCHITECTURE.md §8).
+    UI: MudBlazor 9 only, no Tailwind (ARCHITECTURE.md §7).
+  -->
+
+  <PropertyGroup>
+    <Description>Blazor WebAssembly components and assets for the KinLight portal (family and caregiver app).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.Extensions.Localization" />
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="MudBlazor.Translations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Shared/KinLight.Modules.Shared.csproj" />
+    <ProjectReference Include="../../Widgets/Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+    <ProjectReference Include="../../Widgets/BuiltIn/KinLight.Modules.Widgets.BuiltIn.csproj" />
+  </ItemGroup>
+
+</Project>

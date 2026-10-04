@@ -1,0 +1,70 @@
+@page "/portal/displays"
+@layout PortalLayout
+@inject IPortalApi Api
+@inject IStringLocalizer<PortalStrings> L
+
+<PageTitle>@L[PortalStrings.Displays_Title]</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">@L[PortalStrings.Displays_Title]</MudText>
+
+@if (_displays is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_displays.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">@L[PortalStrings.Displays_Empty]</MudAlert>
+}
+else
+{
+    <MudGrid>
+        @foreach (var display in _displays)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudCardHeader>
+                        <CardHeaderAvatar>
+                            <MudAvatar Color="Color.Primary"><MudIcon Icon="@Icons.Material.Filled.Tv" /></MudAvatar>
+                        </CardHeaderAvatar>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">@display.Name</MudText>
+                            <MudText Typo="Typo.body2">@ShapeLabel(display.ScreenShape) · @LanguageLabel(display.Culture) · @WidgetCountLabel(display.WidgetCount)</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"portal/displays/{display.Id}/arrange")" StartIcon="@Icons.Material.Filled.Dashboard">@L[PortalStrings.Action_Arrange]</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"portal/displays/{display.Id}/settings")" StartIcon="@Icons.Material.Filled.Settings">@L[PortalStrings.Action_Settings]</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private IReadOnlyList<DisplaySummary>? _displays;
+
+    protected override async Task OnInitializedAsync() => _displays = await Api.ListDisplaysAsync(CancellationToken.None);
+
+    private string ShapeLabel(ScreenShape shape) => shape switch
+    {
+        ScreenShape.Wide16x9 => L[PortalStrings.Shape_16x9],
+        ScreenShape.Wide16x10 => L[PortalStrings.Shape_16x10],
+        ScreenShape.Standard4x3 => L[PortalStrings.Shape_4x3],
+        _ => shape.ToString(),
+    };
+
+    internal static string LanguageLabel(string culture)
+    {
+        try
+        {
+            return System.Globalization.CultureInfo.GetCultureInfo(culture).NativeName;
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            return culture;
+        }
+    }
+
+    private string WidgetCountLabel(int count) => count == 1 ? L[PortalStrings.WidgetCount_One] : L[PortalStrings.WidgetCount_Other, count];
+}

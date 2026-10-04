@@ -1,0 +1,13 @@
+{
+  "name": "kinlight-display-client",
+  "private": true,
+  "description": "Tailwind CSS tooling for KinLight.Modules.Display.Client. Invoked by MSBuild; no need to run npm by hand.",
+  "scripts": {
+    "build:css": "tailwindcss -i Styles/app.css -o wwwroot/css/app.css --minify",
+    "watch:css": "tailwindcss -i Styles/app.css -o wwwroot/css/app.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

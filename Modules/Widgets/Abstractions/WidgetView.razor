@@ -1,0 +1,56 @@
+@*
+    Renders one widget: resolves its definition, deserializes settings (defaults on bad JSON), and hosts the
+    view inside an ErrorBoundary that shows nothing (ARCHITECTURE.md §3, §11). Unknown widget types render nothing.
+    Used by the display and by the portal's layout editor previews.
+*@
+@inject IWidgetCatalog Catalog
+
+@if (_definition is not null && _parameters is not null)
+{
+    <ErrorBoundary @ref="_errorBoundary">
+        <ChildContent>
+            <DynamicComponent Type="_definition.ViewComponent" Parameters="_parameters" />
+        </ChildContent>
+        <ErrorContent></ErrorContent>
+    </ErrorBoundary>
+}
+
+@code {
+    private ErrorBoundary? _errorBoundary;
+    private IWidgetDefinition? _definition;
+    private Dictionary<string, object?>? _parameters;
+
+    /// <summary>The placement to render.</summary>
+    [Parameter, EditorRequired]
+    public required WidgetPlacement Placement { get; set; }
+
+    /// <summary>The widget's last good data (an instance of its DataType), or null.</summary>
+    [Parameter]
+    public object? Data { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _definition = Catalog.Find(Placement.TypeKey);
+        if (_definition is null)
+        {
+            _parameters = null;
+            return;
+        }
+
+        var parameters = new Dictionary<string, object?>
+        {
+            ["Placement"] = Placement,
+            ["Settings"] = WidgetSettingsJson.Read(Placement.SettingsJson, _definition.SettingsType),
+        };
+
+        if (_definition.DataType is not null)
+        {
+            parameters["Data"] = Data is not null && _definition.DataType.IsInstanceOfType(Data) ? Data : null;
+        }
+
+        _parameters = parameters;
+
+        // New parameters mean new data: give a widget that failed last time another chance.
+        _errorBoundary?.Recover();
+    }
+}

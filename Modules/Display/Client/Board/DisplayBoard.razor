@@ -1,0 +1,99 @@
+@*
+    The screen: a fixed 12 x 6 CSS grid of widgets (ARCHITECTURE.md §3, §11). Calm, no interaction, never an error.
+    Dims and shows the night sentence through the widgets' DisplayContext when it is night.
+*@
+@implements IDisposable
+@inject TimeProvider Clock
+
+<div class="kl-board @(Context.IsNight ? "kl-board--night" : null)"
+     lang="@Context.Culture.Name"
+     style="--kl-columns: @BoardGrid.Columns; --kl-rows: @BoardGrid.Rows;">
+    <CascadingValue Value="Context" IsFixed="false">
+        @foreach (var placement in VisiblePlacements)
+        {
+            <div @key="placement.Id"
+                 class="kl-board__cell @(placement.HighContrast ? "kl-board__cell--contrast" : null)"
+                 style="grid-column: @(placement.X + 1) / span @placement.Width; grid-row: @(placement.Y + 1) / span @placement.Height; --font-scale: @placement.FontScale.ToString(System.Globalization.CultureInfo.InvariantCulture);">
+                <WidgetHost Placement="placement" />
+            </div>
+        }
+    </CascadingValue>
+</div>
+
+@code {
+    private Timer? _timer;
+    private DisplayContext? _context;
+
+    /// <summary>The display's configuration.</summary>
+    [Parameter, EditorRequired]
+    public required DisplayConfig Config { get; set; }
+
+    private DisplayContext Context => _context ??= CreateContext();
+
+    private IEnumerable<WidgetPlacement> VisiblePlacements
+    {
+        get
+        {
+            var now = TimeOnly.FromDateTime(Context.LocalNow);
+            return Config.Widgets.Where(p => p.IsEnabled && IsWithinVisibleHours(p, now));
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        // Re-evaluate night mode and visibility windows once a minute.
+        _timer = new Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+    }
+
+    protected override void OnParametersSet() => _context = null;
+
+    public void Dispose() => _timer?.Dispose();
+
+    private DisplayContext CreateContext()
+    {
+        var culture = SafeCulture(Config.Culture) ?? System.Globalization.CultureInfo.CurrentCulture;
+        var fallback = Config.FallbackCulture is null ? null : SafeCulture(Config.FallbackCulture);
+        var timeZone = SafeTimeZone(Config.TimeZoneId);
+        return new DisplayContext(culture, fallback, timeZone, Clock, Config.NightMode);
+    }
+
+    private static bool IsWithinVisibleHours(WidgetPlacement placement, TimeOnly now)
+    {
+        if (placement.VisibleFrom is null || placement.VisibleTo is null || placement.VisibleFrom == placement.VisibleTo)
+        {
+            return true;
+        }
+
+        var from = placement.VisibleFrom.Value;
+        var to = placement.VisibleTo.Value;
+        return from < to ? now >= from && now < to : now >= from || now < to;
+    }
+
+    private static System.Globalization.CultureInfo? SafeCulture(string name)
+    {
+        try
+        {
+            return System.Globalization.CultureInfo.GetCultureInfo(name);
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    private static TimeZoneInfo SafeTimeZone(string id)
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(id);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Local;
+        }
+        catch (InvalidTimeZoneException)
+        {
+            return TimeZoneInfo.Local;
+        }
+    }
+}

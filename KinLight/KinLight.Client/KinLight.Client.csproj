@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!--
+    Development host: one runnable Blazor WebAssembly app that serves the display at / and the portal at /portal,
+    with in-browser fakes instead of a server. This is NOT the production shape (ARCHITECTURE.md §7, §11): the
+    shipped display is its own PWA with a fixed culture and an offline service worker, and the portal is hosted
+    separately. This host exists so the two sides can be built and demonstrated end to end without a back end.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Description>KinLight development host: display and portal in one app, no server.</Description>
+    <!-- The display language comes from the portal, not the browser (ARCHITECTURE.md §11). -->
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Modules/Display/Client/KinLight.Modules.Display.Client.csproj" />
+    <ProjectReference Include="../../Modules/Portal/Client/KinLight.Modules.Portal.Client.csproj" />
+  </ItemGroup>
+
+  <!-- Widget settings and data are deserialized by runtime type; keep widget assemblies whole when trimming (ARCHITECTURE.md §11). -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="KinLight.Modules.Widgets.Clock.Client" />
+    <TrimmerRootAssembly Include="KinLight.Modules.Widgets.Calendar.Client" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Minimal API endpoints for the KinLight portal (the family and caregiver app).
+    A class library, not a runnable host: the host calls MapKinLightPortalApi() (ARCHITECTURE.md §8, §18).
+  -->
+
+  <PropertyGroup>
+    <Description>ASP.NET Core minimal API endpoints for the KinLight portal.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

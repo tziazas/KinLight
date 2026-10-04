@@ -1,0 +1,240 @@
+@page "/portal/displays/{DisplayId:guid}/arrange"
+@layout PortalLayout
+@inject IPortalApi Api
+@inject IWidgetCatalog Catalog
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IStringLocalizer<PortalStrings> L
+
+<PageTitle>@L[PortalStrings.Arrange_Title]</PageTitle>
+
+<MudBreadcrumbs Items="Crumbs" Class="px-0" />
+
+@if (_config is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3" Spacing="2">
+        <MudText Typo="Typo.h4">@_config.Name</MudText>
+        <MudSpacer />
+        @if (_dirty)
+        {
+            <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit">@L[PortalStrings.Arrange_Unsaved]</MudChip>
+        }
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="!_dirty || _saving" StartIcon="@Icons.Material.Filled.Save">@L[PortalStrings.Action_Save]</MudButton>
+    </MudStack>
+
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="8">
+            <LayoutEditor @ref="_editor"
+                          Items="_items"
+                          Shape="_config.ScreenShape"
+                          Culture="@_config.Culture"
+                          TimeZoneId="@_config.TimeZoneId"
+                          SelectedId="_selectedId"
+                          SelectedIdChanged="OnSelected"
+                          Changed="MarkDirty" />
+            <MudText Typo="Typo.caption" Class="mt-2 d-block">@L[PortalStrings.Arrange_Hint]</MudText>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            @if (Selected is { } selected)
+            {
+                <MudPaper Class="pa-3 mb-3" Elevation="1">
+                    <MudText Typo="Typo.h6" Class="mb-2">@NameOf(selected.TypeKey)</MudText>
+                    <MudStack Spacing="2">
+                        <MudText Typo="Typo.body2">@L[PortalStrings.Arrange_TextSize, selected.FontScale.ToString("0.00", System.Globalization.CultureInfo.CurrentCulture)]</MudText>
+                        <MudSlider T="double" Value="selected.FontScale" ValueChanged="v => SetFontScale(selected, v)" Min="0.75" Max="2.0" Step="0.05" Color="Color.Primary" />
+                        <MudSwitch T="bool" Value="selected.HighContrast" ValueChanged="v => SetHighContrast(selected, v)" Label="@L[PortalStrings.Arrange_HighContrast]" Color="Color.Primary" />
+                        <MudSwitch T="bool" Value="selected.IsEnabled" ValueChanged="v => SetEnabled(selected, v)" Label="@L[PortalStrings.Arrange_Shown]" Color="Color.Primary" />
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => RemoveAsync(selected)">@L[PortalStrings.Arrange_Remove]</MudButton>
+                    </MudStack>
+                </MudPaper>
+            }
+
+            <MudPaper Class="pa-3" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-2">@L[PortalStrings.Arrange_AddWidget]</MudText>
+                <MudList T="string" Dense="true">
+                    @foreach (var definition in Catalog.All)
+                    {
+                        <MudListItem T="string" OnClick="() => Add(definition)" Icon="@Icons.Material.Filled.AddBox" IconColor="Color.Primary">
+                            @WidgetNames.NameOf(definition, System.Globalization.CultureInfo.CurrentUICulture)
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <NavigationLock ConfirmExternalNavigation="_dirty" OnBeforeInternalNavigation="ConfirmLeaveAsync" />
+}
+
+@code {
+    private List<BreadcrumbItem> Crumbs => [new(L[PortalStrings.Nav_Displays], "portal/displays"), new(L[PortalStrings.Arrange_Title], null, disabled: true)];
+    private readonly List<EditablePlacement> _items = [];
+
+    private DisplayConfig? _config;
+    private LayoutEditor? _editor;
+    private Guid? _selectedId;
+    private bool _dirty;
+    private bool _saving;
+
+    /// <summary>The display being arranged.</summary>
+    [Parameter]
+    public Guid DisplayId { get; set; }
+
+    private EditablePlacement? Selected => _selectedId is null ? null : _items.FirstOrDefault(i => i.Id == _selectedId);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _config = await Api.GetDisplayAsync(DisplayId, CancellationToken.None);
+        if (_config is null)
+        {
+            Navigation.NavigateTo("portal/displays", replace: true);
+            return;
+        }
+
+        _items.Clear();
+        _items.AddRange(_config.Widgets.Select(w => new EditablePlacement(w)));
+        _dirty = false;
+    }
+
+    private void OnSelected(Guid? id) => _selectedId = id;
+
+    private void MarkDirty() => _dirty = true;
+
+    private void SetFontScale(EditablePlacement item, double value)
+    {
+        item.FontScale = Math.Round(value, 2);
+        MarkDirty();
+    }
+
+    private void SetHighContrast(EditablePlacement item, bool value)
+    {
+        item.HighContrast = value;
+        MarkDirty();
+    }
+
+    private void SetEnabled(EditablePlacement item, bool value)
+    {
+        item.IsEnabled = value;
+        MarkDirty();
+    }
+
+    private void Add(IWidgetDefinition definition)
+    {
+        var size = definition.DefaultSize;
+        var spot = FindFreeSpot(size) ?? (0, 0);
+        var placement = new WidgetPlacement(Guid.NewGuid(), definition.TypeKey, spot.X, spot.Y, size.Width, size.Height);
+        var item = new EditablePlacement(placement);
+        _items.Add(item);
+        _selectedId = item.Id;
+        MarkDirty();
+    }
+
+    private async Task RemoveAsync(EditablePlacement item)
+    {
+        if (_editor is not null)
+        {
+            await _editor.RemoveAsync(item);
+        }
+        else
+        {
+            _items.Remove(item);
+            MarkDirty();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_config is null)
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var request = new SaveDisplayLayoutRequest(_config.DisplayId, _config.Version, _items.Select(i => i.ToPlacement()).ToList());
+            var version = await Api.SaveLayoutAsync(request, CancellationToken.None);
+            _config = _config with { Version = version, Widgets = request.Widgets };
+            _dirty = false;
+            Snackbar.Add(L[PortalStrings.Saved], Severity.Success);
+        }
+        catch (VersionConflictException)
+        {
+            Snackbar.Add(L[PortalStrings.Conflict], Severity.Warning);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private Task ConfirmLeaveAsync(LocationChangingContext context)
+    {
+        // No browser dialogs on this portal; the amber chip and this guard are the warning. A second click leaves.
+        if (_dirty && !_leaveConfirmed)
+        {
+            _leaveConfirmed = true;
+            Snackbar.Add(L[PortalStrings.Arrange_LeaveWarning], Severity.Warning);
+            context.PreventNavigation();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private bool _leaveConfirmed;
+
+    private string NameOf(string typeKey)
+    {
+        var definition = Catalog.Find(typeKey);
+        return definition is null ? typeKey : WidgetNames.NameOf(definition, System.Globalization.CultureInfo.CurrentUICulture);
+    }
+
+    private (int X, int Y)? FindFreeSpot(WidgetSize size)
+    {
+        var occupied = new bool[BoardGrid.Columns, BoardGrid.Rows];
+        foreach (var item in _items)
+        {
+            for (var x = item.X; x < Math.Min(item.X + item.Width, BoardGrid.Columns); x++)
+            {
+                for (var y = item.Y; y < Math.Min(item.Y + item.Height, BoardGrid.Rows); y++)
+                {
+                    occupied[x, y] = true;
+                }
+            }
+        }
+
+        for (var y = 0; y + size.Height <= BoardGrid.Rows; y++)
+        {
+            for (var x = 0; x + size.Width <= BoardGrid.Columns; x++)
+            {
+                if (IsFree(occupied, x, y, size))
+                {
+                    return (x, y);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsFree(bool[,] occupied, int x0, int y0, WidgetSize size)
+    {
+        for (var x = x0; x < x0 + size.Width; x++)
+        {
+            for (var y = y0; y < y0 + size.Height; y++)
+            {
+                if (occupied[x, y])
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}

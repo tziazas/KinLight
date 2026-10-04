@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Clock and day widget (ARCHITECTURE.md §14): "It is Saturday afternoon.", the time, and the long date.
+    Needs no server data, so there is no Api project. Browser-safe; references only Abstractions and Shared.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight clock and day widget.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

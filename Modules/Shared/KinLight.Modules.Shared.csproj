@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Contracts that cross the wire between the server and the browser (ARCHITECTURE.md §8).
+    Browser-safe. No dependencies: no DispatchR, no EF Core, no ASP.NET Core, no other KinLight project.
+  -->
+
+  <PropertyGroup>
+    <Description>Wire contracts shared by the KinLight display, portal, widgets and server.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+</Project>

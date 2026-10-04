@@ -1,0 +1,6 @@
+.kl-screen {
+    position: fixed;
+    inset: 0;
+    background: #14212b;
+    cursor: none;
+}

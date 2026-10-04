@@ -1,0 +1,70 @@
+@*
+    Fetches a placement's data, keeps the last good copy, and renders the widget through WidgetView.
+    A failed refresh never clears the data (ARCHITECTURE.md §11).
+*@
+@implements IDisposable
+@inject IDisplayApi Api
+@inject IWidgetCatalog Catalog
+
+<WidgetView Placement="Placement" Data="_data" />
+
+@code {
+    private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(5);
+
+    private readonly CancellationTokenSource _disposed = new();
+    private Timer? _timer;
+    private object? _data;
+    private Guid _loadedFor;
+
+    /// <summary>The placement to host.</summary>
+    [Parameter, EditorRequired]
+    public required WidgetPlacement Placement { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFor == Placement.Id)
+        {
+            return;
+        }
+
+        _loadedFor = Placement.Id;
+        _data = null;
+        await RefreshAsync();
+
+        _timer?.Dispose();
+        _timer = new Timer(_ => InvokeAsync(RefreshAsync), null, RefreshInterval, RefreshInterval);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+        _disposed.Cancel();
+        _disposed.Dispose();
+    }
+
+    private async Task RefreshAsync()
+    {
+        var dataType = Catalog.Find(Placement.TypeKey)?.DataType;
+        if (dataType is null || _disposed.IsCancellationRequested)
+        {
+            return;
+        }
+
+        try
+        {
+            var fresh = await Api.GetWidgetDataAsync(Placement.Id, dataType, _disposed.Token);
+            if (fresh is not null)
+            {
+                _data = fresh;
+                StateHasChanged();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception)
+        {
+            // Keep the last good data. The display never shows an error.
+        }
+    }
+}

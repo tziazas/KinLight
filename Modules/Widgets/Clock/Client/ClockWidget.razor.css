@@ -1,0 +1,29 @@
+/* Scoped styles. Text size = host base font (--kl-base-font, set from the screen size) x per-widget --font-scale. */
+.kl-clock {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    block-size: 100%;
+    padding-inline: 0.5em;
+    font-size: calc(var(--kl-base-font, 1rem) * var(--font-scale, 1));
+    line-height: 1.2;
+}
+
+.kl-clock p {
+    margin: 0;
+}
+
+.kl-clock__sentence {
+    font-size: 2.5em;
+    font-weight: 600;
+}
+
+.kl-clock__time {
+    font-size: 4em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.kl-clock__date {
+    font-size: 1.5em;
+}

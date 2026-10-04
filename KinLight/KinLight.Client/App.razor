@@ -1,0 +1,11 @@
+<Router AppAssembly="typeof(App).Assembly"
+        AdditionalAssemblies="new[] { typeof(KinLight.Modules.Display.Client.Pages.DisplayPage).Assembly, typeof(KinLight.Modules.Portal.Client.Pages.DisplaysPage).Assembly }">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        @* The display at / never shows an error; an unknown URL goes back to it. *@
+        <NavigateToRoot />
+    </NotFound>
+</Router>

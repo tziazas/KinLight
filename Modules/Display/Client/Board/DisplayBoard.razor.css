@@ -1,0 +1,40 @@
+.kl-board {
+    /* Base text size follows the screen height, so a layout looks the same on a 7" tablet and a 50" TV. */
+    --kl-base-font: 2.2vh;
+    display: grid;
+    grid-template-columns: repeat(var(--kl-columns, 12), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--kl-rows, 6), minmax(0, 1fr));
+    gap: 0.5rem;
+    inline-size: 100%;
+    block-size: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    background: var(--kl-board-bg, #14212b);
+    color: var(--kl-board-fg, #f6f8fa);
+    transition: filter 2s ease;
+    overflow: hidden;
+}
+
+.kl-board--night {
+    filter: brightness(0.45);
+}
+
+.kl-board__cell {
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: var(--kl-cell-bg, rgba(255, 255, 255, 0.06));
+}
+
+.kl-board__cell--contrast {
+    background: #000;
+    color: #fff;
+    outline: 2px solid #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kl-board {
+        transition: none;
+    }
+}

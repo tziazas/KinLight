@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Calendar widget, browser side (ARCHITECTURE.md §14): shows what is next today in plain language.
+    The feed address is a secret that lives on the server (Calendar.Api); it is never part of the settings
+    sent to the display. Browser-safe; references only Abstractions and Shared.
+  -->
+
+  <PropertyGroup>
+    <Description>KinLight calendar widget (display view, settings and strings).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

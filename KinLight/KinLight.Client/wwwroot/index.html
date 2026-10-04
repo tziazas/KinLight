@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KinLight</title>
+    <base href="/" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <!-- Display -->
+    <link href="_content/KinLight.Modules.Display.Client/css/app.css" rel="stylesheet" />
+    <!-- Portal: MudBlazor first, then KinLight's font and base rules, then gridstack -->
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="_content/KinLight.Modules.Portal.Client/css/portal.css" rel="stylesheet" />
+    <link href="_content/KinLight.Modules.Portal.Client/lib/gridstack/gridstack.min.css" rel="stylesheet" />
+    <!-- Scoped CSS from every referenced component library -->
+    <link href="KinLight.Client.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app"></div>
+    <!-- No Blazor error bar: the display never shows an error (ARCHITECTURE.md §3). -->
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="_content/KinLight.Modules.Portal.Client/lib/gridstack/gridstack-all.js"></script>
+    <script src="_content/KinLight.Modules.Display.Client/js/boot.js"></script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        // Culture is fixed at boot (ARCHITECTURE.md §11). In this dev host the portal shares the process, so it runs in
+        // the display's language too; the production portal is a separate app with the signed-in person's language.
+        (function () {
+            var culture = null;
+            try {
+                var displays = JSON.parse(localStorage.getItem("kinlight.dev.displays") || "null");
+                if (displays && displays.length) { culture = displays[0].culture || null; }
+            } catch (e) { }
+            kinlightDisplay.start(culture);
+        })();
+    </script>
+</body>
+</html>

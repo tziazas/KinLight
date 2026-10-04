@@ -1,0 +1,144 @@
+@page "/portal/displays/{DisplayId:guid}/settings"
+@layout PortalLayout
+@inject IPortalApi Api
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IStringLocalizer<PortalStrings> L
+
+<PageTitle>@L[PortalStrings.Settings_Title]</PageTitle>
+
+<MudBreadcrumbs Items="Crumbs" Class="px-0" />
+
+@if (_config is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudText Typo="Typo.h4" Class="mb-4">@_config.Name</MudText>
+
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudForm @ref="_form">
+            <MudStack Spacing="3">
+                <MudTextField @bind-Value="_name" Label="@L[PortalStrings.Settings_Name]" Required="true" RequiredError="@L[PortalStrings.Settings_NameRequired]" MaxLength="60" />
+
+                <MudSelect T="ScreenShape" @bind-Value="_shape" Label="@L[PortalStrings.Settings_Shape]" HelperText="@L[PortalStrings.Settings_ShapeHelp]">
+                    <MudSelectItem Value="ScreenShape.Wide16x9">@L[PortalStrings.Settings_Shape16x9]</MudSelectItem>
+                    <MudSelectItem Value="ScreenShape.Wide16x10">@L[PortalStrings.Settings_Shape16x10]</MudSelectItem>
+                    <MudSelectItem Value="ScreenShape.Standard4x3">@L[PortalStrings.Settings_Shape4x3]</MudSelectItem>
+                </MudSelect>
+
+                <MudSelect T="string" @bind-Value="_culture" Label="@L[PortalStrings.Settings_Language]" HelperText="@L[PortalStrings.Settings_LanguageHelp]">
+                    @foreach (var culture in KnownCultures.Display)
+                    {
+                        <MudSelectItem Value="@culture">@DisplaysPage.LanguageLabel(culture)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="string" @bind-Value="_fallbackCulture" Label="@L[PortalStrings.Settings_BackupLanguage]" Clearable="true" HelperText="@L[PortalStrings.Settings_BackupLanguageHelp]">
+                    @foreach (var culture in KnownCultures.Display)
+                    {
+                        <MudSelectItem Value="@culture">@DisplaysPage.LanguageLabel(culture)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudAutocomplete T="string" @bind-Value="_timeZoneId" Label="@L[PortalStrings.Settings_TimeZone]" SearchFunc="SearchTimeZones" Required="true" RequiredError="@L[PortalStrings.Settings_TimeZoneRequired]" MaxItems="20" />
+
+                <MudText Typo="Typo.subtitle1" Class="mt-2">@L[PortalStrings.Settings_NightHours]</MudText>
+                <MudText Typo="Typo.body2">@L[PortalStrings.Settings_NightHoursHelp]</MudText>
+                <MudStack Row="true" Spacing="3">
+                    <MudTimePicker @bind-Time="_nightStart" Label="@L[PortalStrings.Settings_NightBegins]" />
+                    <MudTimePicker @bind-Time="_nightEnd" Label="@L[PortalStrings.Settings_NightEnds]" />
+                </MudStack>
+            </MudStack>
+        </MudForm>
+    </MudPaper>
+
+    <MudStack Row="true" Class="mt-4" Spacing="2">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="_saving" StartIcon="@Icons.Material.Filled.Save">@L[PortalStrings.Action_Save]</MudButton>
+        <MudButton Variant="Variant.Text" Href="portal/displays">@L[PortalStrings.Action_Cancel]</MudButton>
+    </MudStack>
+}
+
+@code {
+    private static readonly IReadOnlyList<string> TimeZoneIds = TimeZoneInfo.GetSystemTimeZones().Select(tz => tz.Id).Order(StringComparer.Ordinal).ToList();
+
+    private List<BreadcrumbItem> Crumbs => [new(L[PortalStrings.Nav_Displays], "portal/displays"), new(L[PortalStrings.Settings_Title], null, disabled: true)];
+
+    private DisplayConfig? _config;
+    private MudForm? _form;
+    private bool _saving;
+
+    private string _name = string.Empty;
+    private ScreenShape _shape;
+    private string _culture = "en";
+    private string? _fallbackCulture;
+    private string _timeZoneId = string.Empty;
+    private TimeSpan? _nightStart;
+    private TimeSpan? _nightEnd;
+
+    /// <summary>The display being edited.</summary>
+    [Parameter]
+    public Guid DisplayId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _config = await Api.GetDisplayAsync(DisplayId, CancellationToken.None);
+        if (_config is null)
+        {
+            Navigation.NavigateTo("portal/displays", replace: true);
+            return;
+        }
+
+        _name = _config.Name;
+        _shape = _config.ScreenShape;
+        _culture = _config.Culture;
+        _fallbackCulture = _config.FallbackCulture;
+        _timeZoneId = _config.TimeZoneId;
+        _nightStart = _config.NightMode.StartsAt.ToTimeSpan();
+        _nightEnd = _config.NightMode.EndsAt.ToTimeSpan();
+    }
+
+    private Task<IEnumerable<string>> SearchTimeZones(string? value, CancellationToken cancellationToken)
+    {
+        IEnumerable<string> result = string.IsNullOrWhiteSpace(value)
+            ? TimeZoneIds
+            : TimeZoneIds.Where(id => id.Contains(value, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(result);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_config is null || _form is null)
+        {
+            return;
+        }
+
+        await _form.ValidateAsync();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var night = new NightMode(
+                TimeOnly.FromTimeSpan(_nightStart ?? TimeSpan.Zero),
+                TimeOnly.FromTimeSpan(_nightEnd ?? TimeSpan.Zero));
+
+            var settings = new DisplaySettings(_name.Trim(), _shape, _culture, _fallbackCulture, _timeZoneId, night);
+            var version = await Api.UpdateSettingsAsync(new UpdateDisplaySettingsRequest(_config.DisplayId, _config.Version, settings), CancellationToken.None);
+            _config = _config with { Version = version, Name = settings.Name, ScreenShape = settings.ScreenShape, Culture = settings.Culture, FallbackCulture = settings.FallbackCulture, TimeZoneId = settings.TimeZoneId, NightMode = settings.NightMode };
+            Snackbar.Add(L[PortalStrings.Saved], Severity.Success);
+        }
+        catch (VersionConflictException)
+        {
+            Snackbar.Add(L[PortalStrings.Conflict], Severity.Warning);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

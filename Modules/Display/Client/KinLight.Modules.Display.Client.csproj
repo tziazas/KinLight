@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Blazor WebAssembly class library for the KinLight display.
+    This is a library, not the runnable display app: a host (e.g. the future KinLight package)
+    references it and serves its components and static assets.
+    Browser-safe: must never reference Core, EF Core, or any server-only package (ARCHITECTURE.md §8).
+  -->
+
+  <PropertyGroup>
+    <Description>Blazor WebAssembly components and assets for the KinLight display.</Description>
+    <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.Extensions.Localization" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Shared/KinLight.Modules.Shared.csproj" />
+    <ProjectReference Include="../../Widgets/Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
+    <ProjectReference Include="../../Widgets/BuiltIn/KinLight.Modules.Widgets.BuiltIn.csproj" />
+  </ItemGroup>
+
+  <!--
+    Tailwind CSS. Styles/app.css is the source; wwwroot/css/app.css is generated at build time
+    and is not committed. Requires Node.js (npm) on the build machine.
+  -->
+  <ItemGroup>
+    <TailwindInput Include="Styles/**/*.css;**/*.razor" Exclude="bin/**;obj/**;node_modules/**;wwwroot/**" />
+    <None Include="package.json;package-lock.json" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TailwindOutput>wwwroot/css/app.css</TailwindOutput>
+  </PropertyGroup>
+
+  <Target Name="TailwindRestore"
+          Condition="!Exists('$(MSBuildProjectDirectory)/node_modules/.package-lock.json')">
+    <Message Importance="high" Text="Installing Tailwind CSS tooling (npm ci)..." />
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <Target Name="TailwindBuild"
+          DependsOnTargets="TailwindRestore"
+          BeforeTargets="BeforeBuild"
+          Inputs="@(TailwindInput);package.json"
+          Outputs="$(TailwindOutput)">
+    <Message Importance="high" Text="Building Tailwind CSS -> $(TailwindOutput)" />
+    <Exec Command="npx --no-install @tailwindcss/cli -i Styles/app.css -o $(TailwindOutput) --minify"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <!-- The file may not have existed when items were evaluated; make sure it becomes a static web asset. -->
+    <ItemGroup>
+      <Content Include="$(TailwindOutput)" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="TailwindClean" AfterTargets="Clean">
+    <Delete Files="$(TailwindOutput)" />
+  </Target>
+
+</Project>
