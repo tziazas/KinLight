@@ -46,7 +46,7 @@ This is the complete intended feature set. Items are marked **done**, **partly d
 | Clock and day | **Done** | A plain sentence such as "It is Saturday afternoon.", the time, and the date written out in full. At night the sentence changes and the weekday is dropped on purpose. |
 | Calendar | **Partly done** | Shows what is next today, in plain language, from a Google Calendar secret iCal address (no OAuth). The view and the server-side feed parser exist; the encrypted address storage and the server are not built yet. |
 | Photos | **Done** | Rotates family photos slowly with a caption saying who the person is to the viewer, for example "Erato, your daughter". Captions are entered per language. Photos are grouped into albums; a screen can show one album or all photos. Caption over or under the photo, interval, order and visibility are per-widget settings. |
-| Medication reminders | Planned | A large reminder during each dose window, with no button on the screen. The caregiver who gives the dose confirms it with one tap on the portal's Today page, prompted by a phone notification. Once confirmed the screen says so. Family is alerted if a dose is not confirmed by the end of its window. Documented as a supplement, never the safety mechanism. |
+| Medication reminders | **Partly done** | A large reminder during each dose window ("Time for your morning medication." plus the caregiver-written instructions), with no button on the screen. The caregiver who gives the dose confirms it with one tap on the portal's Today page; the log records who and when. Once confirmed the screen says "Morning medication: taken at 8:10." Schedules can be daily, on chosen weekdays, every N days, on specific dates, or as needed. Missed doses are flagged in the portal; the phone notifications that prompt caregivers and alert family need the server. Documented as a supplement, never the safety mechanism. |
 | Family messages | Planned | Short messages from family, such as "Nikos is visiting at 3." |
 | Weather | Later | Plain language: "Cold today, wear a coat." |
 
@@ -76,8 +76,8 @@ Widgets are a plug-in system. See [Creating a widget](#creating-a-widget).
 | Widget settings | **Done** | Owner, Family | A form generated from each widget's settings class, opened from the Arrange page. |
 | Settings | **Done** | Owner, Family | Name, screen shape, display language, backup language, time zone, night hours. |
 | Photos | **Done** | Owner, Family | Upload (downscaled in the browser before upload), caption per language, albums, delete. |
-| Today | Planned | All, landing page for Caregivers | Today's medications with a large Confirm button per dose, what is happening today, a short-message box. |
-| Medications | Planned | Owner, Family | Schedules, dose windows, confirmation history (who, when). |
+| Today | **Partly done** | All, landing page for Caregivers | Today's medications with a large Confirm button per dose, and "given now" for as-needed medication. Built as an extension point, so what is happening today and the short-message box can join it. |
+| Medications | **Done** | Owner, Family | Schedules, dose windows, confirmation history for the last seven days (who, when, missed). |
 | Devices | Planned | Owner | Pair a new screen, rename, revoke a lost tablet. |
 | Members | Planned | Owner | Invite by link or email, set roles and access expiry, remove access. |
 | Export and delete | Planned | Owner | Download everything the household has; delete the household. |
@@ -88,11 +88,11 @@ Widgets are a plug-in system. See [Creating a widget](#creating-a-widget).
 | Capability | Status |
 |---|---|
 | Households as the unit of isolation; one household never sees another's data, enforced in three independent layers and covered by tests that are never skipped | Planned |
-| Three roles: Owner, Family, Caregiver, enforced on every command, not just by hiding navigation | Planned |
+| Three roles: Owner, Family, Caregiver, enforced on every command, not just by hiding navigation | **Partly done**: the portal knows the signed-in member's role and hides and redirects accordingly; server-side enforcement comes with the server |
 | Accounts always per person, never shared; caregivers join by invitation link and sign in with a passkey | Planned |
 | Access expiry for caregivers, for example the end of an agency assignment | Planned |
 | Secrets (calendar addresses, device tokens) encrypted at rest or stored only as hashes | Planned |
-| Phone notifications by Web Push, no app store app, with email fallback. Notification text never contains medication names, doses or the person's name | Planned |
+| Phone notifications by Web Push, no app store app, with email fallback. Notification text never contains medication names, doses or the person's name | Planned (the notification contract and missed-dose detection exist; delivery needs the server) |
 | One-click export of everything and full deletion, in both editions | Planned |
 | No analytics, trackers, advertising or third-party scripts, ever | **Done** (by rule) |
 
@@ -206,7 +206,7 @@ Then open:
 - **Display:** http://localhost:5180/
 - **Portal:** http://localhost:5180/portal
 
-The host seeds one display called "Kitchen" with a clock. Everything you change is kept in the browser's localStorage and IndexedDB under keys starting with `kinlight.dev.`; clear them to start over. There is no button on the display that leads to the portal, by design: the display never offers a control.
+The host seeds one display called "Kitchen" with a clock and one made-up medication schedule. A switcher in the portal's app bar picks which made-up household member is "signed in" (an Owner, a Family member or a Caregiver), so role-dependent pages and the confirmation log can be exercised. Everything you change is kept in the browser's localStorage and IndexedDB under keys starting with `kinlight.dev.`; clear them to start over. There is no button on the display that leads to the portal, by design: the display never offers a control.
 
 The dev host is a harness, not the production shape. In production the display is its own installable app with a fixed language and an offline service worker, and the portal is a separate app in the signed-in person's language. In the dev host both share one process, so the portal runs in the display's language.
 
@@ -216,7 +216,7 @@ The dev host is a harness, not the production shape. In production the display i
 dotnet test KinLight.slnx
 ```
 
-The current suite checks translation completeness: every translated resource file has exactly the keys of its English source, no value is empty, and the languages offered to families are exactly the ones that are fully translated.
+The suite checks translation completeness (every translated resource file has exactly the keys of its English source, no value is empty, and the languages offered to families are exactly the ones that are fully translated) and the medication dose rules (schedule kinds, windows, status transitions, confirmations, missed-dose detection).
 
 ---
 
@@ -252,12 +252,16 @@ Modules/
     Photos/Client/  Photos/Api/  Photos/Portal/
                                          Photos widget, its data provider and image endpoint, and the portal's
                                          photo library page.
+    Medication/Client/  Medication/Api/  Medication/Portal/
+                                         Medication reminders: scheduling model and dose logic, data provider and
+                                         missed-dose detection, Medications page and Today section.
 
 KinLight/
   KinLight.Client/                       Development host: display at /, portal at /portal, in-browser fakes.
 
 tests/
   KinLight.Localization.Tests/           Translation completeness.
+  KinLight.Widgets.Tests/                Dose scheduling and status rules.
 ```
 
 ARCHITECTURE.md §8 describes a `src/` layout with slightly different project names. The Modules layout above is the one in use; the document is being updated to match.

@@ -1,0 +1,116 @@
+@*
+    During a dose window: a large reminder and the instructions, nothing to press (ARCHITECTURE.md §2 rule 6).
+    After the caregiver confirms on the portal: "Morning medication: taken at 8:10." for a while.
+    Between doses: quietly, when the next one is. After a missed window: nothing; the family is alerted instead.
+*@
+@inherits WidgetComponentBase<MedicationSettings, MedicationData>
+@implements IDisposable
+
+@if (View is { } view)
+{
+    <div class="kl-med kl-med--@view.Kind.ToString().ToLowerInvariant()" lang="@Context.Culture.Name" role="status">
+        <p class="kl-med__sentence">@view.Sentence</p>
+        @if (view.Instructions.Count > 0)
+        {
+            <ul class="kl-med__instructions">
+                @foreach (var line in view.Instructions)
+                {
+                    <li>@line</li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+@code {
+    private Timer? _timer;
+
+    private enum ViewKind { Due, Taken, Next }
+
+    private sealed record ViewModel(ViewKind Kind, string Sentence, IReadOnlyList<string> Instructions);
+
+    private IWidgetStrings T => Strings<MedicationStrings>();
+
+    private ViewModel? View
+    {
+        get
+        {
+            if (Data is null || Data.Doses.Count == 0)
+            {
+                return null;
+            }
+
+            var now = Context.LocalNow;
+            if (Data.Date != DateOnly.FromDateTime(now))
+            {
+                // Yesterday's data after midnight: say nothing rather than something wrong.
+                return null;
+            }
+
+            var groups = Data.Doses.GroupBy(d => d.At).OrderBy(g => g.Key).ToList();
+
+            // Due: inside the window and at least one dose not yet confirmed.
+            foreach (var group in groups)
+            {
+                var start = Data.Date.ToDateTime(group.Key);
+                var end = start.AddMinutes(group.Max(d => Math.Max(1, d.WindowMinutes)));
+                var open = group.Where(d => d.TakenAt is null).ToList();
+                if (open.Count > 0 && now >= start && now < end)
+                {
+                    var instructions = Settings.ShowInstructions
+                        ? open.Select(d => Context.Resolve(d.Instructions, allowUnreviewed: false)).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToList()
+                        : [];
+                    return new ViewModel(ViewKind.Due, T[TimeForKey(DoseLogic.PartOf(group.Key))], instructions);
+                }
+            }
+
+            // Taken recently: the latest fully confirmed group whose confirmation is still fresh.
+            var taken = groups
+                .Where(g => g.All(d => d.TakenAt is not null))
+                .Select(g => (At: g.Key, TakenAt: g.Max(d => d.TakenAt!.Value)))
+                .Where(x => now >= Data.Date.ToDateTime(x.TakenAt) && now < Data.Date.ToDateTime(x.TakenAt).AddMinutes(Settings.TakenVisibleMinutes))
+                .OrderByDescending(x => x.TakenAt)
+                .FirstOrDefault();
+            if (taken != default)
+            {
+                return new ViewModel(ViewKind.Taken, T[TakenKey(DoseLogic.PartOf(taken.At)), taken.TakenAt.ToString("t", Context.Culture)], []);
+            }
+
+            if (Settings.ShowNextDose)
+            {
+                var next = groups.FirstOrDefault(g => Data.Date.ToDateTime(g.Key) > now && g.Any(d => d.TakenAt is null));
+                if (next is not null)
+                {
+                    return new ViewModel(ViewKind.Next, T[MedicationStrings.NextDoseAt, next.Key.ToString("t", Context.Culture)], []);
+                }
+            }
+
+            return null;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _timer = new Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
+    public void Dispose() => _timer?.Dispose();
+
+    private static string TimeForKey(DosePart part) => part switch
+    {
+        DosePart.Morning => MedicationStrings.TimeFor_Morning,
+        DosePart.Midday => MedicationStrings.TimeFor_Midday,
+        DosePart.Afternoon => MedicationStrings.TimeFor_Afternoon,
+        DosePart.Evening => MedicationStrings.TimeFor_Evening,
+        _ => MedicationStrings.TimeFor_Night,
+    };
+
+    private static string TakenKey(DosePart part) => part switch
+    {
+        DosePart.Morning => MedicationStrings.Taken_Morning,
+        DosePart.Midday => MedicationStrings.Taken_Midday,
+        DosePart.Afternoon => MedicationStrings.Taken_Afternoon,
+        DosePart.Evening => MedicationStrings.Taken_Evening,
+        _ => MedicationStrings.Taken_Night,
+    };
+}

@@ -3,6 +3,8 @@
 @using System.Globalization
 @inject IPhotoLibraryApi Library
 @inject IPortalApi Portal
+@inject ICurrentMember Member
+@inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 @inject IDialogService Dialogs
@@ -76,6 +78,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Caregivers have no access to the photo library (ARCHITECTURE.md §13). The server enforces this too.
+        if (Member.Role == MemberRole.Caregiver)
+        {
+            Navigation.NavigateTo("portal/today", replace: true);
+            return;
+        }
+
         _languages = await Portal.GetDisplayLanguagesAsync(CancellationToken.None);
         await RefreshAsync();
     }

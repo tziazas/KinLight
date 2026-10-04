@@ -1,3 +1,5 @@
+using KinLight.Modules.Shared;
+
 namespace KinLight.Modules.Portal.Client;
 
 /// <summary>
@@ -17,4 +19,7 @@ public interface IPortalNavItem
 
     /// <summary>The label in the portal's current language.</summary>
     string Label { get; }
+
+    /// <summary>Whether members with <paramref name="role"/> see this entry. Pages enforce roles too; this only hides navigation.</summary>
+    bool IsVisibleTo(MemberRole role) => true;
 }

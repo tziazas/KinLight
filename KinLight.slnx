@@ -29,6 +29,11 @@
     <Project Path="Modules/Widgets/Calendar/Api/KinLight.Modules.Widgets.Calendar.Api.csproj" />
     <Project Path="Modules/Widgets/Calendar/Client/KinLight.Modules.Widgets.Calendar.Client.csproj" />
   </Folder>
+  <Folder Name="/Modules/Widgets/Medication/">
+    <Project Path="Modules/Widgets/Medication/Api/KinLight.Modules.Widgets.Medication.Api.csproj" />
+    <Project Path="Modules/Widgets/Medication/Client/KinLight.Modules.Widgets.Medication.Client.csproj" />
+    <Project Path="Modules/Widgets/Medication/Portal/KinLight.Modules.Widgets.Medication.Portal.csproj" />
+  </Folder>
   <Folder Name="/Modules/Widgets/Photos/">
     <Project Path="Modules/Widgets/Photos/Api/KinLight.Modules.Widgets.Photos.Api.csproj" />
     <Project Path="Modules/Widgets/Photos/Client/KinLight.Modules.Widgets.Photos.Client.csproj" />
@@ -39,5 +44,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/KinLight.Localization.Tests/KinLight.Localization.Tests.csproj" />
+    <Project Path="tests/KinLight.Widgets.Tests/KinLight.Widgets.Tests.csproj" />
   </Folder>
 </Solution>

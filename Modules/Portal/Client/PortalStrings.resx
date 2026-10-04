@@ -51,4 +51,9 @@
   <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
   <data name="Widget_NoSettings" xml:space="preserve"><value>This widget has no settings.</value></data>
   <data name="Settings_TimeZoneHelp" xml:space="preserve"><value>Type a city in English, for example Athens or London.</value></data>
+  <data name="Today_Title" xml:space="preserve"><value>Today</value></data>
+  <data name="Today_Empty" xml:space="preserve"><value>Nothing to do today.</value></data>
+  <data name="Role_Owner" xml:space="preserve"><value>Owner</value></data>
+  <data name="Role_Family" xml:space="preserve"><value>Family</value></data>
+  <data name="Role_Caregiver" xml:space="preserve"><value>Caregiver</value></data>
 </root>

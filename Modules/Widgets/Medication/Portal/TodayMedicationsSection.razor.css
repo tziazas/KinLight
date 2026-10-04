@@ -1,0 +1,18 @@
+.kl-dose__main {
+    min-inline-size: 0;
+    flex: 1 1 14rem;
+}
+
+.kl-dose__confirm {
+    min-block-size: 3.25rem;
+    padding-inline: 1.5rem;
+}
+
+.kl-dose--due {
+    border-color: #B7791F;
+    border-width: 2px;
+}
+
+.kl-dose--missed {
+    border-color: #b23a48;
+}

@@ -1,4 +1,5 @@
 using KinLight.Modules.Widgets.Calendar.Api;
+using KinLight.Modules.Widgets.Medication.Api;
 using KinLight.Modules.Widgets.Photos.Api;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,6 +23,7 @@ public static class DisplayApiServiceCollectionExtensions
         // Server side of every widget that fetches outside data. One line per widget.
         services.AddKinLightCalendarWidgetProvider();
         services.AddKinLightPhotosWidgetProvider();
+        services.AddKinLightMedicationWidgetProvider();
 
         // Display API services are registered here as endpoints are added.
         return services;

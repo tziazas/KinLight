@@ -18,6 +18,7 @@
     <ProjectReference Include="../../Widgets/Abstractions/KinLight.Modules.Widgets.Abstractions.csproj" />
     <ProjectReference Include="../../Widgets/Calendar/Api/KinLight.Modules.Widgets.Calendar.Api.csproj" />
     <ProjectReference Include="../../Widgets/Photos/Api/KinLight.Modules.Widgets.Photos.Api.csproj" />
+    <ProjectReference Include="../../Widgets/Medication/Api/KinLight.Modules.Widgets.Medication.Api.csproj" />
   </ItemGroup>
 
 </Project>

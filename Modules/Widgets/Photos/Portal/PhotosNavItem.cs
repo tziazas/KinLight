@@ -1,5 +1,6 @@
 using System.Globalization;
 using KinLight.Modules.Portal.Client;
+using KinLight.Modules.Shared;
 using KinLight.Modules.Widgets.Abstractions;
 using MudBlazor;
 
@@ -19,4 +20,8 @@ public sealed class PhotosNavItem : IPortalNavItem
 
     /// <inheritdoc />
     public string Label => WidgetStrings.For<PhotosPortalStrings>(CultureInfo.CurrentUICulture)[PhotosPortalStrings.Nav_Photos];
+
+    /// <inheritdoc />
+    /// <remarks>Caregivers have no access to the photo library (ARCHITECTURE.md §13).</remarks>
+    public bool IsVisibleTo(MemberRole role) => role != MemberRole.Caregiver;
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Medications" xml:space="preserve"><value>Medications</value></data>
+  <data name="Today_Section" xml:space="preserve"><value>Medications</value></data>
+  <data name="Today_NoDoses" xml:space="preserve"><value>No medication is scheduled for today.</value></data>
+  <data name="Today_Confirm" xml:space="preserve"><value>Confirm given</value></data>
+  <data name="Today_GiveNow" xml:space="preserve"><value>Given now</value></data>
+  <data name="Today_AsNeeded" xml:space="preserve"><value>When needed</value></data>
+  <data name="Status_Upcoming" xml:space="preserve"><value>Later</value></data>
+  <data name="Status_Due" xml:space="preserve"><value>Due now</value></data>
+  <data name="Status_Taken" xml:space="preserve"><value>Given</value></data>
+  <data name="Status_Missed" xml:space="preserve"><value>Missed</value></data>
+  <data name="TakenBy" xml:space="preserve"><value>Given at {0} by {1}.</value></data>
+  <data name="Window" xml:space="preserve"><value>{0}, within {1} minutes</value></data>
+  <data name="Supplement" xml:space="preserve"><value>Reminders are a help, not a safety system. The person who gives the medication confirms it here, never the person taking it.</value></data>
+  <data name="Schedules_Title" xml:space="preserve"><value>Medications</value></data>
+  <data name="Schedules_Empty" xml:space="preserve"><value>No medications yet. Add one, and the screen will remind at each dose time.</value></data>
+  <data name="Schedules_Add" xml:space="preserve"><value>Add medication</value></data>
+  <data name="Schedules_Inactive" xml:space="preserve"><value>Paused</value></data>
+  <data name="History_Title" xml:space="preserve"><value>Last 7 days</value></data>
+  <data name="History_Empty" xml:space="preserve"><value>Nothing recorded in the last 7 days.</value></data>
+  <data name="Edit_Name" xml:space="preserve"><value>Medication</value></data>
+  <data name="Edit_NameHelp" xml:space="preserve"><value>Name and dose as the family knows it. Shown here only, never on the screen.</value></data>
+  <data name="Edit_NameRequired" xml:space="preserve"><value>Give the medication a name.</value></data>
+  <data name="Edit_Instructions" xml:space="preserve"><value>What the screen should say</value></data>
+  <data name="Edit_InstructionsHelp" xml:space="preserve"><value>Plain words for the person, for example "Two white tablets with a glass of water." Only text written or checked by a person is shown.</value></data>
+  <data name="Edit_Kind" xml:space="preserve"><value>How often</value></data>
+  <data name="Kind_Daily" xml:space="preserve"><value>Every day</value></data>
+  <data name="Kind_Weekly" xml:space="preserve"><value>On certain weekdays</value></data>
+  <data name="Kind_EveryNDays" xml:space="preserve"><value>Every few days</value></data>
+  <data name="Kind_SpecificDates" xml:space="preserve"><value>On specific dates</value></data>
+  <data name="Kind_AsNeeded" xml:space="preserve"><value>When needed</value></data>
+  <data name="Edit_Doses" xml:space="preserve"><value>Dose times</value></data>
+  <data name="Edit_AddDose" xml:space="preserve"><value>Add a time</value></data>
+  <data name="Edit_DoseTime" xml:space="preserve"><value>Time</value></data>
+  <data name="Edit_WindowMinutes" xml:space="preserve"><value>Minutes allowed</value></data>
+  <data name="Edit_Weekdays" xml:space="preserve"><value>Weekdays</value></data>
+  <data name="Edit_EveryNDays" xml:space="preserve"><value>Every how many days</value></data>
+  <data name="Edit_AnchorDate" xml:space="preserve"><value>Starting on</value></data>
+  <data name="Edit_Dates" xml:space="preserve"><value>Dates</value></data>
+  <data name="Edit_AddDate" xml:space="preserve"><value>Add a date</value></data>
+  <data name="Edit_StartsOn" xml:space="preserve"><value>First day (optional)</value></data>
+  <data name="Edit_EndsOn" xml:space="preserve"><value>Last day (optional)</value></data>
+  <data name="Edit_Active" xml:space="preserve"><value>Active</value></data>
+  <data name="Edit_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Edit_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Edit_Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Edit_DeleteConfirm" xml:space="preserve"><value>Delete this medication? Past confirmations are kept.</value></data>
+  <data name="Edit_Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Saved" xml:space="preserve"><value>Saved.</value></data>
+  <data name="Confirmed" xml:space="preserve"><value>Recorded. Thank you.</value></data>
+  <data name="Summary_Daily" xml:space="preserve"><value>Every day at {0}</value></data>
+  <data name="Summary_Weekly" xml:space="preserve"><value>{1} at {0}</value></data>
+  <data name="Summary_EveryNDays" xml:space="preserve"><value>Every {1} days at {0}</value></data>
+  <data name="Summary_SpecificDates" xml:space="preserve"><value>{1} dates at {0}</value></data>
+  <data name="Summary_AsNeeded" xml:space="preserve"><value>When needed</value></data>
+</root>

@@ -1,0 +1,27 @@
+@page "/portal/today"
+@layout PortalLayout
+@inject IEnumerable<TodaySectionRegistration> Sections
+@inject IStringLocalizer<PortalStrings> L
+
+@*
+    The Today page (ARCHITECTURE.md §13): the landing page for Caregivers, designed for one hand on a phone.
+    Modules contribute sections (medications, what is happening today, a short message box) through
+    AddPortalTodaySection; this page only orders them.
+*@
+<PageTitle>@L[PortalStrings.Today_Title]</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">@L[PortalStrings.Today_Title]</MudText>
+
+@if (!Sections.Any())
+{
+    <MudAlert Severity="Severity.Info">@L[PortalStrings.Today_Empty]</MudAlert>
+}
+else
+{
+    <MudStack Spacing="4">
+        @foreach (var section in Sections.OrderBy(s => s.Order))
+        {
+            <DynamicComponent @key="section.Component" Type="section.Component" />
+        }
+    </MudStack>
+}

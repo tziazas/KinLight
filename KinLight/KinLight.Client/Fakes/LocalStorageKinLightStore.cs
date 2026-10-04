@@ -4,6 +4,8 @@ using KinLight.Modules.Portal.Client;
 using KinLight.Modules.Shared;
 using KinLight.Modules.Widgets.Abstractions;
 using KinLight.Modules.Widgets.Clock.Client;
+using KinLight.Modules.Widgets.Medication.Api;
+using KinLight.Modules.Widgets.Medication.Client;
 using KinLight.Modules.Widgets.Photos.Client;
 using Microsoft.JSInterop;
 
@@ -24,18 +26,21 @@ public sealed class LocalStorageKinLightStore : IDisplayApi, IPortalApi
     private readonly IWidgetCatalog _catalog;
     private readonly TimeProvider _clock;
     private readonly IndexedDbPhotoLibrary _photos;
+    private readonly LocalStorageMedicationStore _medications;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private List<DisplayConfig>? _displays;
 
     /// <summary>Creates the store.</summary>
-    public LocalStorageKinLightStore(IJSRuntime js, IWidgetCatalog catalog, TimeProvider clock, IndexedDbPhotoLibrary photos)
+    public LocalStorageKinLightStore(IJSRuntime js, IWidgetCatalog catalog, TimeProvider clock, IndexedDbPhotoLibrary photos, LocalStorageMedicationStore medications)
     {
         _js = js;
         _catalog = catalog;
         _clock = clock;
         _photos = photos;
-        // A library change is a config change as far as the display is concerned: it refetches widget data.
+        _medications = medications;
+        // A library or medication change is a config change as far as the display is concerned: it refetches widget data.
         _photos.Changed += NotifyChangedAsync;
+        _medications.Changed += NotifyChangedAsync;
     }
 
     /// <inheritdoc />
@@ -63,6 +68,16 @@ public sealed class LocalStorageKinLightStore : IDisplayApi, IPortalApi
         if (definition?.DataType is null)
         {
             return null;
+        }
+
+        if (placement.TypeKey == MedicationWidgetDefinition.Key)
+        {
+            var timeZone = SafeTimeZone(display.TimeZoneId);
+            var localNow = TimeZoneInfo.ConvertTime(_clock.GetUtcNow(), timeZone).DateTime;
+            var today = DateOnly.FromDateTime(localNow);
+            var schedules = await _medications.ListSchedulesAsync(cancellationToken);
+            var confirmations = await _medications.ListConfirmationsAsync(today, today, cancellationToken);
+            return MedicationDataProvider.Build(schedules, confirmations, today, localNow, timeZone);
         }
 
         if (placement.TypeKey == PhotosWidgetDefinition.Key)

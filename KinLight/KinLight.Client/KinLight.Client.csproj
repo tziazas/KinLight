@@ -25,6 +25,8 @@
     <ProjectReference Include="../../Modules/Display/Client/KinLight.Modules.Display.Client.csproj" />
     <ProjectReference Include="../../Modules/Portal/Client/KinLight.Modules.Portal.Client.csproj" />
     <ProjectReference Include="../../Modules/Widgets/Photos/Portal/KinLight.Modules.Widgets.Photos.Portal.csproj" />
+    <ProjectReference Include="../../Modules/Widgets/Medication/Portal/KinLight.Modules.Widgets.Medication.Portal.csproj" />
+    <ProjectReference Include="../../Modules/Widgets/Medication/Api/KinLight.Modules.Widgets.Medication.Api.csproj" />
   </ItemGroup>
 
   <!-- Widget settings and data are deserialized by runtime type; keep widget assemblies whole when trimming (ARCHITECTURE.md §11). -->
@@ -32,6 +34,7 @@
     <TrimmerRootAssembly Include="KinLight.Modules.Widgets.Clock.Client" />
     <TrimmerRootAssembly Include="KinLight.Modules.Widgets.Calendar.Client" />
     <TrimmerRootAssembly Include="KinLight.Modules.Widgets.Photos.Client" />
+    <TrimmerRootAssembly Include="KinLight.Modules.Widgets.Medication.Client" />
   </ItemGroup>
 
 </Project>

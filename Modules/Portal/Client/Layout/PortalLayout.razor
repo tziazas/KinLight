@@ -2,6 +2,9 @@
 @inject NavigationManager Navigation
 @inject IStringLocalizer<PortalStrings> L
 @inject IEnumerable<IPortalNavItem> NavItems
+@inject IEnumerable<AppBarItemRegistration> AppBarItems
+@inject ICurrentMember Member
+@implements IDisposable
 
 <MudThemeProvider Theme="KinLightTheme.Default" />
 <MudPopoverProvider />
@@ -13,12 +16,19 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" aria-label="Menu" />
         <MudText Typo="Typo.h6" Class="ml-2">@L[PortalStrings.AppName]</MudText>
         <MudSpacer />
+        @foreach (var item in AppBarItems)
+        {
+            <DynamicComponent Type="item.Component" />
+        }
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="1" Breakpoint="Breakpoint.Md">
         <MudNavMenu>
-            <MudNavLink Href="portal/today" Icon="@Icons.Material.Filled.Today" Disabled="true">@L[PortalStrings.Nav_Today]</MudNavLink>
-            <MudNavLink Href="portal/displays" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tv">@L[PortalStrings.Nav_Displays]</MudNavLink>
-            @foreach (var item in NavItems.OrderBy(i => i.Order))
+            <MudNavLink Href="portal/today" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Today">@L[PortalStrings.Nav_Today]</MudNavLink>
+            @if (Member.Role != MemberRole.Caregiver)
+            {
+                <MudNavLink Href="portal/displays" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tv">@L[PortalStrings.Nav_Displays]</MudNavLink>
+            }
+            @foreach (var item in NavItems.Where(i => i.IsVisibleTo(Member.Role)).OrderBy(i => i.Order))
             {
                 <MudNavLink Href="@item.Href" Match="NavLinkMatch.Prefix" Icon="@item.Icon">@item.Label</MudNavLink>
             }
@@ -33,6 +43,12 @@
 
 @code {
     private bool _drawerOpen = true;
+
+    protected override void OnInitialized() => Member.Changed += OnMemberChanged;
+
+    public void Dispose() => Member.Changed -= OnMemberChanged;
+
+    private void OnMemberChanged() => InvokeAsync(StateHasChanged);
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 }

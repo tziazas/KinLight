@@ -148,6 +148,21 @@ public sealed class PortalStrings
     /// <summary>Type a city in English, for example Athens or London.</summary>
     public const string Settings_TimeZoneHelp = nameof(Settings_TimeZoneHelp);
 
+    /// <summary>Today</summary>
+    public const string Today_Title = nameof(Today_Title);
+
+    /// <summary>Nothing to do today.</summary>
+    public const string Today_Empty = nameof(Today_Empty);
+
+    /// <summary>Owner</summary>
+    public const string Role_Owner = nameof(Role_Owner);
+
+    /// <summary>Family</summary>
+    public const string Role_Family = nameof(Role_Family);
+
+    /// <summary>Caregiver</summary>
+    public const string Role_Caregiver = nameof(Role_Caregiver);
+
     private PortalStrings()
     {
     }

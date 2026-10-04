@@ -51,4 +51,9 @@
   <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
   <data name="Widget_NoSettings" xml:space="preserve"><value>Αυτό το στοιχείο δεν έχει ρυθμίσεις.</value></data>
   <data name="Settings_TimeZoneHelp" xml:space="preserve"><value>Γράψτε μια πόλη στα αγγλικά, π.χ. Athens ή London.</value></data>
+  <data name="Today_Title" xml:space="preserve"><value>Σήμερα</value></data>
+  <data name="Today_Empty" xml:space="preserve"><value>Δεν υπάρχει κάτι για σήμερα.</value></data>
+  <data name="Role_Owner" xml:space="preserve"><value>Ιδιοκτήτης</value></data>
+  <data name="Role_Family" xml:space="preserve"><value>Οικογένεια</value></data>
+  <data name="Role_Caregiver" xml:space="preserve"><value>Φροντιστής</value></data>
 </root>

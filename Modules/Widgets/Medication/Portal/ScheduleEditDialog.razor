@@ -1,0 +1,211 @@
+@*
+    Add or edit a medication. The model is immutable; this dialog edits a mutable draft and returns a new record.
+*@
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(string.IsNullOrEmpty(_name) ? T[MedicationPortalStrings.Schedules_Add] : _name)</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudStack Spacing="3">
+                <MudTextField @bind-Value="_name" Label="@T[MedicationPortalStrings.Edit_Name]" HelperText="@T[MedicationPortalStrings.Edit_NameHelp]" Required="true" RequiredError="@T[MedicationPortalStrings.Edit_NameRequired]" MaxLength="80" />
+
+                <div>
+                    <LocalizedTextEditor Value="_instructions" Languages="Languages" Label="@T[MedicationPortalStrings.Edit_Instructions]" />
+                    <MudText Typo="Typo.caption">@T[MedicationPortalStrings.Edit_InstructionsHelp]</MudText>
+                </div>
+
+                <MudSelect T="ScheduleKind" @bind-Value="_kind" Label="@T[MedicationPortalStrings.Edit_Kind]">
+                    @foreach (var kind in Enum.GetValues<ScheduleKind>())
+                    {
+                        <MudSelectItem Value="kind">@MedicationText.KindLabel(kind)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                @if (_kind != ScheduleKind.AsNeeded)
+                {
+                    <MudText Typo="Typo.subtitle2">@T[MedicationPortalStrings.Edit_Doses]</MudText>
+                    @for (var i = 0; i < _doses.Count; i++)
+                    {
+                        var index = i;
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudTimePicker Label="@T[MedicationPortalStrings.Edit_DoseTime]" Time="_doses[index].At.ToTimeSpan()" TimeChanged="t => SetDoseTime(index, t)" />
+                            <MudNumericField T="int" Label="@T[MedicationPortalStrings.Edit_WindowMinutes]" Value="_doses[index].WindowMinutes" ValueChanged="m => SetDoseWindow(index, m)" Min="5" Max="720" />
+                            <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Color="Color.Error" OnClick="() => _doses.RemoveAt(index)" Disabled="_doses.Count <= 1" aria-label="@T[MedicationPortalStrings.Edit_Delete]" />
+                        </MudStack>
+                    }
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddDose">@T[MedicationPortalStrings.Edit_AddDose]</MudButton>
+                }
+
+                @if (_kind == ScheduleKind.Weekly)
+                {
+                    <MudText Typo="Typo.subtitle2">@T[MedicationPortalStrings.Edit_Weekdays]</MudText>
+                    <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap">
+                        @foreach (var day in WeekOrder)
+                        {
+                            var d = day;
+                            <MudCheckBox T="bool" Value="_weekdays.Contains(d)" ValueChanged="on => ToggleWeekday(d, on)" Label="@CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(d)" Dense="true" />
+                        }
+                    </MudStack>
+                }
+
+                @if (_kind == ScheduleKind.EveryNDays)
+                {
+                    <MudStack Row="true" Spacing="2">
+                        <MudNumericField T="int" @bind-Value="_everyNDays" Label="@T[MedicationPortalStrings.Edit_EveryNDays]" Min="2" Max="90" />
+                        <MudDatePicker Label="@T[MedicationPortalStrings.Edit_AnchorDate]" @bind-Date="_anchorDate" />
+                    </MudStack>
+                }
+
+                @if (_kind == ScheduleKind.SpecificDates)
+                {
+                    <MudText Typo="Typo.subtitle2">@T[MedicationPortalStrings.Edit_Dates]</MudText>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudDatePicker Label="@T[MedicationPortalStrings.Edit_AddDate]" @bind-Date="_newDate" />
+                        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddDate" Disabled="_newDate is null">@T[MedicationPortalStrings.Edit_AddDate]</MudButton>
+                    </MudStack>
+                    @if (_dates.Count > 0)
+                    {
+                        <MudChipSet T="DateOnly" AllClosable="true" OnClose="chip => _dates.Remove(chip.Value)">
+                            @foreach (var date in _dates.Order())
+                            {
+                                <MudChip T="DateOnly" Value="date">@date.ToString("d", CultureInfo.CurrentCulture)</MudChip>
+                            }
+                        </MudChipSet>
+                    }
+                }
+
+                <MudStack Row="true" Spacing="2">
+                    <MudDatePicker Label="@T[MedicationPortalStrings.Edit_StartsOn]" @bind-Date="_startsOn" Clearable="true" />
+                    <MudDatePicker Label="@T[MedicationPortalStrings.Edit_EndsOn]" @bind-Date="_endsOn" Clearable="true" />
+                </MudStack>
+
+                <MudSwitch T="bool" @bind-Value="_isActive" Label="@T[MedicationPortalStrings.Edit_Active]" Color="Color.Primary" />
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="() => Dialog.Cancel()">@T[MedicationPortalStrings.Edit_Cancel]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveAsync">@T[MedicationPortalStrings.Edit_Save]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private static readonly DayOfWeek[] WeekOrder = [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
+
+    private MudForm? _form;
+    private string _name = string.Empty;
+    private LocalizedText _instructions = new();
+    private ScheduleKind _kind;
+    private List<DoseTime> _doses = [];
+    private HashSet<DayOfWeek> _weekdays = [];
+    private int _everyNDays = 2;
+    private DateTime? _anchorDate;
+    private List<DateOnly> _dates = [];
+    private DateTime? _newDate;
+    private DateTime? _startsOn;
+    private DateTime? _endsOn;
+    private bool _isActive = true;
+
+    private static IWidgetStrings T => MedicationText.T;
+
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The schedule to edit (a new one for adding).</summary>
+    [Parameter, EditorRequired]
+    public required MedicationSchedule Schedule { get; set; }
+
+    /// <summary>Languages for the instructions.</summary>
+    [Parameter]
+    public IReadOnlyList<string> Languages { get; set; } = ["en"];
+
+    protected override void OnParametersSet()
+    {
+        _name = Schedule.Name;
+        _instructions = new LocalizedText { Values = new(Schedule.Instructions.Values, StringComparer.OrdinalIgnoreCase), Unreviewed = new(Schedule.Instructions.Unreviewed, StringComparer.OrdinalIgnoreCase) };
+        _kind = Schedule.Kind;
+        _doses = Schedule.Doses.Count > 0 ? Schedule.Doses.ToList() : [new DoseTime(new TimeOnly(8, 0), 60)];
+        _weekdays = Schedule.Weekdays.ToHashSet();
+        _everyNDays = Math.Max(2, Schedule.EveryNDays);
+        _anchorDate = Schedule.AnchorDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Today;
+        _dates = Schedule.Dates.ToList();
+        _startsOn = Schedule.StartsOn?.ToDateTime(TimeOnly.MinValue);
+        _endsOn = Schedule.EndsOn?.ToDateTime(TimeOnly.MinValue);
+        _isActive = Schedule.IsActive;
+    }
+
+    private void AddDose()
+    {
+        var last = _doses.Count > 0 ? _doses[^1].At : new TimeOnly(8, 0);
+        _doses.Add(new DoseTime(last.AddHours(4), 60));
+    }
+
+    private void SetDoseTime(int index, TimeSpan? time)
+    {
+        if (time is { } t)
+        {
+            _doses[index] = _doses[index] with { At = TimeOnly.FromTimeSpan(t) };
+        }
+    }
+
+    private void SetDoseWindow(int index, int minutes) => _doses[index] = _doses[index] with { WindowMinutes = minutes };
+
+    private void ToggleWeekday(DayOfWeek day, bool on)
+    {
+        if (on)
+        {
+            _weekdays.Add(day);
+        }
+        else
+        {
+            _weekdays.Remove(day);
+        }
+    }
+
+    private void AddDate()
+    {
+        if (_newDate is { } d)
+        {
+            var date = DateOnly.FromDateTime(d);
+            if (!_dates.Contains(date))
+            {
+                _dates.Add(date);
+            }
+
+            _newDate = null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.ValidateAsync();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        var saved = Schedule with
+        {
+            Name = _name.Trim(),
+            Instructions = _instructions,
+            Kind = _kind,
+            Doses = _kind == ScheduleKind.AsNeeded ? [] : _doses.OrderBy(d => d.At).ToList(),
+            Weekdays = _kind == ScheduleKind.Weekly ? _weekdays.ToList() : [],
+            EveryNDays = _everyNDays,
+            AnchorDate = _kind == ScheduleKind.EveryNDays && _anchorDate is { } a ? DateOnly.FromDateTime(a) : null,
+            Dates = _kind == ScheduleKind.SpecificDates ? _dates.Order().ToList() : [],
+            StartsOn = _startsOn is { } s ? DateOnly.FromDateTime(s) : null,
+            EndsOn = _endsOn is { } e ? DateOnly.FromDateTime(e) : null,
+            IsActive = _isActive,
+        };
+
+        Dialog.Close(DialogResult.Ok(saved));
+    }
+}

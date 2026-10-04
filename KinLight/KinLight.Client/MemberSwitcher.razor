@@ -1,0 +1,24 @@
+@*
+    Development only: pick which made-up household member is "signed in". Lives in the app bar.
+*@
+@using KinLight.Client.Fakes
+@using KinLight.Modules.Shared
+@using MudBlazor
+@inject FakeCurrentMember Member
+
+<MudSelect T="Guid" Value="Member.Id" ValueChanged="id => Member.SwitchAsync(id)" ToStringFunc="Label" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+           Class="kl-member-switcher" Style="inline-size: 15rem; flex: 0 0 auto; --mud-palette-text-primary: #fff; --mud-palette-lines-inputs: rgba(255,255,255,0.6);"
+           AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.Start" AdornmentColor="Color.Inherit" aria-label="Signed in as">
+    @foreach (var m in FakeCurrentMember.Members)
+    {
+        <MudSelectItem T="Guid" Value="m.Id">@Label(m.Id)</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    private static string Label(Guid id)
+    {
+        var m = FakeCurrentMember.Members.FirstOrDefault(x => x.Id == id);
+        return m == default ? string.Empty : $"{m.Name} · {m.Role}";
+    }
+}

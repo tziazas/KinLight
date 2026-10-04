@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="WidgetName" xml:space="preserve"><value>Medication reminders</value></data>
+  <data name="TimeFor_Morning" xml:space="preserve"><value>Time for your morning medication.</value></data>
+  <data name="TimeFor_Midday" xml:space="preserve"><value>Time for your midday medication.</value></data>
+  <data name="TimeFor_Afternoon" xml:space="preserve"><value>Time for your afternoon medication.</value></data>
+  <data name="TimeFor_Evening" xml:space="preserve"><value>Time for your evening medication.</value></data>
+  <data name="TimeFor_Night" xml:space="preserve"><value>Time for your night medication.</value></data>
+  <data name="Taken_Morning" xml:space="preserve"><value>Morning medication: taken at {0}.</value></data>
+  <data name="Taken_Midday" xml:space="preserve"><value>Midday medication: taken at {0}.</value></data>
+  <data name="Taken_Afternoon" xml:space="preserve"><value>Afternoon medication: taken at {0}.</value></data>
+  <data name="Taken_Evening" xml:space="preserve"><value>Evening medication: taken at {0}.</value></data>
+  <data name="Taken_Night" xml:space="preserve"><value>Night medication: taken at {0}.</value></data>
+  <data name="NextDoseAt" xml:space="preserve"><value>Next medication at {0}.</value></data>
+  <data name="Settings_ShowInstructions" xml:space="preserve"><value>Show instructions</value></data>
+  <data name="Settings_ShowNextDose" xml:space="preserve"><value>Show the next dose between doses</value></data>
+  <data name="Settings_TakenVisibleMinutes" xml:space="preserve"><value>Minutes the "taken" message stays</value></data>
+</root>

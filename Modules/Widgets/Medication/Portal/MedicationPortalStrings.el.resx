@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Medications" xml:space="preserve"><value>Φάρμακα</value></data>
+  <data name="Today_Section" xml:space="preserve"><value>Φάρμακα</value></data>
+  <data name="Today_NoDoses" xml:space="preserve"><value>Δεν υπάρχουν προγραμματισμένα φάρμακα για σήμερα.</value></data>
+  <data name="Today_Confirm" xml:space="preserve"><value>Επιβεβαίωση ότι δόθηκε</value></data>
+  <data name="Today_GiveNow" xml:space="preserve"><value>Δόθηκε τώρα</value></data>
+  <data name="Today_AsNeeded" xml:space="preserve"><value>Όταν χρειάζεται</value></data>
+  <data name="Status_Upcoming" xml:space="preserve"><value>Αργότερα</value></data>
+  <data name="Status_Due" xml:space="preserve"><value>Ώρα τώρα</value></data>
+  <data name="Status_Taken" xml:space="preserve"><value>Δόθηκε</value></data>
+  <data name="Status_Missed" xml:space="preserve"><value>Παραλείφθηκε</value></data>
+  <data name="TakenBy" xml:space="preserve"><value>Δόθηκε στις {0} από {1}.</value></data>
+  <data name="Window" xml:space="preserve"><value>{0}, εντός {1} λεπτών</value></data>
+  <data name="Supplement" xml:space="preserve"><value>Οι υπενθυμίσεις είναι βοήθεια, όχι σύστημα ασφαλείας. Το άτομο που δίνει το φάρμακο το επιβεβαιώνει εδώ, ποτέ το άτομο που το παίρνει.</value></data>
+  <data name="Schedules_Title" xml:space="preserve"><value>Φάρμακα</value></data>
+  <data name="Schedules_Empty" xml:space="preserve"><value>Δεν υπάρχουν φάρμακα ακόμη. Προσθέστε ένα και η οθόνη θα υπενθυμίζει σε κάθε ώρα δόσης.</value></data>
+  <data name="Schedules_Add" xml:space="preserve"><value>Προσθήκη φαρμάκου</value></data>
+  <data name="Schedules_Inactive" xml:space="preserve"><value>Σε παύση</value></data>
+  <data name="History_Title" xml:space="preserve"><value>Τελευταίες 7 ημέρες</value></data>
+  <data name="History_Empty" xml:space="preserve"><value>Δεν καταγράφηκε κάτι τις τελευταίες 7 ημέρες.</value></data>
+  <data name="Edit_Name" xml:space="preserve"><value>Φάρμακο</value></data>
+  <data name="Edit_NameHelp" xml:space="preserve"><value>Όνομα και δόση όπως τα ξέρει η οικογένεια. Εμφανίζεται μόνο εδώ, ποτέ στην οθόνη.</value></data>
+  <data name="Edit_NameRequired" xml:space="preserve"><value>Δώστε ένα όνομα στο φάρμακο.</value></data>
+  <data name="Edit_Instructions" xml:space="preserve"><value>Τι να λέει η οθόνη</value></data>
+  <data name="Edit_InstructionsHelp" xml:space="preserve"><value>Απλά λόγια για το άτομο, π.χ. «Δύο άσπρα χάπια με ένα ποτήρι νερό.» Εμφανίζεται μόνο κείμενο που έγραψε ή έλεγξε άνθρωπος.</value></data>
+  <data name="Edit_Kind" xml:space="preserve"><value>Πόσο συχνά</value></data>
+  <data name="Kind_Daily" xml:space="preserve"><value>Κάθε μέρα</value></data>
+  <data name="Kind_Weekly" xml:space="preserve"><value>Ορισμένες ημέρες της εβδομάδας</value></data>
+  <data name="Kind_EveryNDays" xml:space="preserve"><value>Κάθε λίγες ημέρες</value></data>
+  <data name="Kind_SpecificDates" xml:space="preserve"><value>Σε συγκεκριμένες ημερομηνίες</value></data>
+  <data name="Kind_AsNeeded" xml:space="preserve"><value>Όταν χρειάζεται</value></data>
+  <data name="Edit_Doses" xml:space="preserve"><value>Ώρες δόσεων</value></data>
+  <data name="Edit_AddDose" xml:space="preserve"><value>Προσθήκη ώρας</value></data>
+  <data name="Edit_DoseTime" xml:space="preserve"><value>Ώρα</value></data>
+  <data name="Edit_WindowMinutes" xml:space="preserve"><value>Λεπτά περιθώριο</value></data>
+  <data name="Edit_Weekdays" xml:space="preserve"><value>Ημέρες της εβδομάδας</value></data>
+  <data name="Edit_EveryNDays" xml:space="preserve"><value>Κάθε πόσες ημέρες</value></data>
+  <data name="Edit_AnchorDate" xml:space="preserve"><value>Ξεκινώντας στις</value></data>
+  <data name="Edit_Dates" xml:space="preserve"><value>Ημερομηνίες</value></data>
+  <data name="Edit_AddDate" xml:space="preserve"><value>Προσθήκη ημερομηνίας</value></data>
+  <data name="Edit_StartsOn" xml:space="preserve"><value>Πρώτη ημέρα (προαιρετικό)</value></data>
+  <data name="Edit_EndsOn" xml:space="preserve"><value>Τελευταία ημέρα (προαιρετικό)</value></data>
+  <data name="Edit_Active" xml:space="preserve"><value>Ενεργό</value></data>
+  <data name="Edit_Save" xml:space="preserve"><value>Αποθήκευση</value></data>
+  <data name="Edit_Cancel" xml:space="preserve"><value>Άκυρο</value></data>
+  <data name="Edit_Delete" xml:space="preserve"><value>Διαγραφή</value></data>
+  <data name="Edit_DeleteConfirm" xml:space="preserve"><value>Να διαγραφεί αυτό το φάρμακο; Οι παλιές επιβεβαιώσεις διατηρούνται.</value></data>
+  <data name="Edit_Edit" xml:space="preserve"><value>Επεξεργασία</value></data>
+  <data name="Saved" xml:space="preserve"><value>Αποθηκεύτηκε.</value></data>
+  <data name="Confirmed" xml:space="preserve"><value>Καταγράφηκε. Ευχαριστούμε.</value></data>
+  <data name="Summary_Daily" xml:space="preserve"><value>Κάθε μέρα στις {0}</value></data>
+  <data name="Summary_Weekly" xml:space="preserve"><value>{1} στις {0}</value></data>
+  <data name="Summary_EveryNDays" xml:space="preserve"><value>Κάθε {1} ημέρες στις {0}</value></data>
+  <data name="Summary_SpecificDates" xml:space="preserve"><value>{1} ημερομηνίες στις {0}</value></data>
+  <data name="Summary_AsNeeded" xml:space="preserve"><value>Όταν χρειάζεται</value></data>
+</root>

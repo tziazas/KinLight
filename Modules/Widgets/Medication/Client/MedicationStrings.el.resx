@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="WidgetName" xml:space="preserve"><value>Υπενθυμίσεις φαρμάκων</value></data>
+  <data name="TimeFor_Morning" xml:space="preserve"><value>Ώρα για τα πρωινά σου φάρμακα.</value></data>
+  <data name="TimeFor_Midday" xml:space="preserve"><value>Ώρα για τα μεσημεριανά σου φάρμακα.</value></data>
+  <data name="TimeFor_Afternoon" xml:space="preserve"><value>Ώρα για τα απογευματινά σου φάρμακα.</value></data>
+  <data name="TimeFor_Evening" xml:space="preserve"><value>Ώρα για τα βραδινά σου φάρμακα.</value></data>
+  <data name="TimeFor_Night" xml:space="preserve"><value>Ώρα για τα φάρμακα πριν τον ύπνο.</value></data>
+  <data name="Taken_Morning" xml:space="preserve"><value>Πρωινά φάρμακα: τα πήρες στις {0}.</value></data>
+  <data name="Taken_Midday" xml:space="preserve"><value>Μεσημεριανά φάρμακα: τα πήρες στις {0}.</value></data>
+  <data name="Taken_Afternoon" xml:space="preserve"><value>Απογευματινά φάρμακα: τα πήρες στις {0}.</value></data>
+  <data name="Taken_Evening" xml:space="preserve"><value>Βραδινά φάρμακα: τα πήρες στις {0}.</value></data>
+  <data name="Taken_Night" xml:space="preserve"><value>Φάρμακα πριν τον ύπνο: τα πήρες στις {0}.</value></data>
+  <data name="NextDoseAt" xml:space="preserve"><value>Επόμενα φάρμακα στις {0}.</value></data>
+  <data name="Settings_ShowInstructions" xml:space="preserve"><value>Εμφάνιση οδηγιών</value></data>
+  <data name="Settings_ShowNextDose" xml:space="preserve"><value>Εμφάνιση της επόμενης δόσης ανάμεσα στις δόσεις</value></data>
+  <data name="Settings_TakenVisibleMinutes" xml:space="preserve"><value>Λεπτά που μένει το μήνυμα «τα πήρες»</value></data>
+</root>
